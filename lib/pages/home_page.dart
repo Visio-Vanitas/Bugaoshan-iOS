@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rubbish_plan/l10n/app_localizations.dart';
 import 'package:rubbish_plan/pages/course_page.dart';
 import 'package:rubbish_plan/pages/profile_page.dart';
 import 'package:rubbish_plan/widgets/common/navigation_item.dart';
@@ -12,20 +13,28 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  static final List<NavigationItemData> _navigationItems = [
-    NavigationItemData(
-      icon: Icons.menu_book_outlined,
-      selectedIcon: Icons.menu_book,
-      label: '课程',
-      page: CoursePage(),
-    ),
-    NavigationItemData(
-      icon: Icons.person_outlined,
-      selectedIcon: Icons.person,
-      label: '我的',
-      page: ProfilePage(),
-    ),
-  ];
+  late AppLocalizations _localizations;
+  late List<NavigationItemData> _navigationItems;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _localizations = AppLocalizations.of(context)!;
+    _navigationItems = [
+      NavigationItemData(
+        icon: Icons.menu_book_outlined,
+        selectedIcon: Icons.menu_book,
+        label: _localizations.course,
+        page: CoursePage(),
+      ),
+      NavigationItemData(
+        icon: Icons.person_outlined,
+        selectedIcon: Icons.person,
+        label: _localizations.profile,
+        page: ProfilePage(),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return _buildMainScreen();
