@@ -41,6 +41,8 @@ dependencies:
   url_launcher: 
   package_info_plus: 
 
+  web: any
+  async: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

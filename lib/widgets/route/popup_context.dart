@@ -4,10 +4,10 @@ class PopupContext extends InheritedWidget {
   final bool isInPopup;
   
   const PopupContext({
-    Key? key,
+    super.key,
     required this.isInPopup,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
   
   static PopupContext? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<PopupContext>();

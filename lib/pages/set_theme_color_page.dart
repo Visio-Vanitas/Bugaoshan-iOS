@@ -3,7 +3,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:rubbish_plan/injection/injector.dart';
 import 'package:rubbish_plan/l10n/app_localizations.dart';
 import 'package:rubbish_plan/providers/app_config_provider.dart';
-import 'package:rubbish_plan/widgets/common/padding.dart';
 
 class SetThemeColorPage extends StatefulWidget {
   const SetThemeColorPage({super.key});
@@ -92,8 +91,8 @@ class _SetThemeColorPageState extends State<SetThemeColorPage> {
               ),
             ),
             floatingActionButton: FloatingActionButton(
-              child: const Icon(Icons.check),
               onPressed: _confirmChanges,
+              child: const Icon(Icons.check),
             ),
           );
         },
