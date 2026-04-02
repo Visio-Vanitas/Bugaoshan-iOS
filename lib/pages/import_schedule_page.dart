@@ -39,15 +39,15 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
 
       // Initial suggested name
       String baseName = config.semesterName.isEmpty
-          ? '导入的课表'
+          ? l10n.importedScheduleDefaultName
           : config.semesterName;
       String finalName = baseName;
 
       // Check for conflict and ask for rename if necessary
       if (widget.courseProvider.isScheduleNameTaken(finalName)) {
         // Try appending '(导入)' if it doesn't already have it
-        if (!finalName.contains('(导入)')) {
-          finalName = '$finalName (导入)';
+        if (!finalName.contains(l10n.importNameSuffix)) {
+          finalName = '$finalName ${l10n.importNameSuffix}';
         }
 
         // If it still conflicts (or if it already had '(导入)'), show rename dialog
@@ -60,7 +60,7 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('名称 "${finalName}" 已存在，请重命名：'),
+                  Text(l10n.importNameConflictHint(finalName)),
                   const SizedBox(height: 16),
                   TextField(
                     controller: controller,

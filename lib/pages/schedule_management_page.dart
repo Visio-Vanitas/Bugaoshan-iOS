@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rubbish_plan/injection/injector.dart';
@@ -146,7 +146,7 @@ class ScheduleManagementPage extends StatelessWidget {
                   isCurrent ? Icons.check_circle : Icons.circle_outlined,
                   color: isCurrent ? Theme.of(context).colorScheme.primary : Colors.grey,
                 ),
-                title: Text(schedule.semesterName.isEmpty ? '默认课表' : schedule.semesterName),
+                title: Text(schedule.semesterName.isEmpty ? l10n.defaultScheduleName : schedule.semesterName),
                 subtitle: Text('共 ${schedule.totalWeeks} 周'),
                 onTap: () {
                   courseProvider.switchSchedule(schedule.id);
@@ -221,7 +221,7 @@ class ScheduleManagementPage extends StatelessWidget {
                         onPressed: () async {
                           final confirm = await showYesNoDialog(
                             title: l10n.delete,
-                            content: '确定要删除课表 "${schedule.semesterName}" 吗？',
+                            content: l10n.deleteScheduleConfirm(schedule.semesterName),
                           );
                           if (confirm == true) {
                             await courseProvider.deleteSchedule(schedule.id);

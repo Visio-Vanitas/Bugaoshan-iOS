@@ -310,6 +310,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importFailed => '导入失败，请检查数据格式';
 
   @override
+  String get importedScheduleDefaultName => '导入的课表';
+
+  @override
+  String importNameConflictHint(Object name) {
+    return '名称 \"$name\" 已存在，请重命名：';
+  }
+
+  @override
+  String get importNameSuffix => '(导入)';
+
+  @override
+  String get defaultScheduleName => '默认课表';
+
+  @override
+  String deleteScheduleConfirm(Object name) {
+    return '确定要删除课表 \"$name\" 吗？';
+  }
+
+  @override
+  String get exportSchedule => '导出课表';
+
+  @override
+  String get copySuffix => ' (副本)';
+
+  @override
   String get notThisWeek => '[非本周]';
 
   @override

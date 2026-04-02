@@ -315,6 +315,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importFailed => 'Import failed, please check data format';
 
   @override
+  String get importedScheduleDefaultName => 'Imported Schedule';
+
+  @override
+  String importNameConflictHint(Object name) {
+    return 'Name \"$name\" already exists, please rename:';
+  }
+
+  @override
+  String get importNameSuffix => '(Import)';
+
+  @override
+  String get defaultScheduleName => 'Default Schedule';
+
+  @override
+  String deleteScheduleConfirm(Object name) {
+    return 'Are you sure you want to delete schedule \"$name\"?';
+  }
+
+  @override
+  String get exportSchedule => 'Export Schedule';
+
+  @override
+  String get copySuffix => ' (Copy)';
+
+  @override
   String get notThisWeek => '[Not this week]';
 
   @override

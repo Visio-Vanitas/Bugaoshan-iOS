@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:rubbish_plan/l10n/app_localizations.dart';
 import 'package:rubbish_plan/models/course.dart';
 import 'package:rubbish_plan/pages/course_edit_page.dart';
@@ -82,7 +82,7 @@ class CourseDetailSheet extends StatelessWidget {
                     onPressed: () {
                       Navigator.pop(context);
                       final newCourse = course.copyWith(); // Create a new copy
-                      newCourse.name = '${course.name} (Copy)';
+                      newCourse.name = '${course.name}${l10n.copySuffix}';
                       popupOrNavigate(
                         context,
                         CourseEditPage(course: newCourse),

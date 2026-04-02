@@ -685,6 +685,48 @@ abstract class AppLocalizations {
   /// **'Import failed, please check data format'**
   String get importFailed;
 
+  /// No description provided for @importedScheduleDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported Schedule'**
+  String get importedScheduleDefaultName;
+
+  /// No description provided for @importNameConflictHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name \"{name}\" already exists, please rename:'**
+  String importNameConflictHint(Object name);
+
+  /// No description provided for @importNameSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'(Import)'**
+  String get importNameSuffix;
+
+  /// No description provided for @defaultScheduleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Schedule'**
+  String get defaultScheduleName;
+
+  /// No description provided for @deleteScheduleConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete schedule \"{name}\"?'**
+  String deleteScheduleConfirm(Object name);
+
+  /// No description provided for @exportSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Schedule'**
+  String get exportSchedule;
+
+  /// No description provided for @copySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' (Copy)'**
+  String get copySuffix;
+
   /// No description provided for @notThisWeek.
   ///
   /// In en, this message translates to:

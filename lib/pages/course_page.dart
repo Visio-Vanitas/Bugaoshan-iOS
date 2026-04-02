@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rubbish_plan/injection/injector.dart';
@@ -114,7 +114,7 @@ class _CoursePageState extends State<CoursePage> {
 
   Widget _buildTopBar(BuildContext context, AppLocalizations l10n, int week, int totalWeeks) {
     final config = courseProvider.scheduleConfig.value;
-    final scheduleName = config.semesterName.isEmpty ? '默认课表' : config.semesterName;
+    final scheduleName = config.semesterName.isEmpty ? l10n.defaultScheduleName : config.semesterName;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -171,7 +171,7 @@ class _CoursePageState extends State<CoursePage> {
               IconButton(
                 onPressed: _showSchedulePicker,
                 icon: const Icon(Icons.list_alt_rounded, size: 20),
-                tooltip: '课表管理',
+                tooltip: l10n.scheduleManagement,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               ),
               IconButton(
@@ -183,13 +183,13 @@ class _CoursePageState extends State<CoursePage> {
               IconButton(
                 onPressed: _onExport,
                 icon: const Icon(Icons.send, size: 20),
-                tooltip: '导出课表',
+                tooltip: l10n.exportSchedule,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               ),
               IconButton(
                 onPressed: _onAddCourse,
                 icon: const Icon(Icons.add, size: 20),
-                tooltip: '添加课程',
+                tooltip: l10n.addCourse,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               ),
             ],

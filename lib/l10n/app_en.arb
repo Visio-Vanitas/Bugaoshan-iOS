@@ -1,4 +1,4 @@
-﻿{
+{
     "rubbishPlan": "Rubbish Plan",
     "selfLanguage": "English",
     "course": "Course",
@@ -96,8 +96,15 @@
     "importFromText":"Import from text",
     "importDataHint":"Paste schedule JSON data here...",
     "importSuccess":"Schedule imported successfully",
-    "importFailed":"Import failed, please check data format",
-    "notThisWeek":"[Not this week]",
+    "importFailed": "Import failed, please check data format",
+    "importedScheduleDefaultName": "Imported Schedule",
+    "importNameConflictHint": "Name \"{name}\" already exists, please rename:",
+    "importNameSuffix": "(Import)",
+    "defaultScheduleName": "Default Schedule",
+    "deleteScheduleConfirm": "Are you sure you want to delete schedule \"{name}\"?",
+    "exportSchedule": "Export Schedule",
+    "copySuffix": " (Copy)",
+    "notThisWeek": "[Not this week]",
     "invalidSectionRange":"End section must be greater than start section",
     "crossPeriodError":"Cross Period Error",
     "crossPeriodErrorMessage":"A course cannot span across morning, afternoon, or evening periods.",
