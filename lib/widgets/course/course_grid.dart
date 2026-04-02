@@ -344,7 +344,7 @@ class _CourseCard extends StatelessWidget {
         final color = course.color.withValues(
             alpha: isActive
                 ? appConfig.colorOpacity.value
-                : appConfig.colorOpacity.value * 0.35);
+                : appConfig.colorOpacity.value * 0.2);
         final textColor = Colors.white;
         final fontSize = appConfig.courseCardFontSize.value;
         final smallFontSize = fontSize - 1;

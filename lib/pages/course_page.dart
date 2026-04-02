@@ -113,46 +113,89 @@ class _CoursePageState extends State<CoursePage> {
   }
 
   Widget _buildTopBar(BuildContext context, AppLocalizations l10n, int week, int totalWeeks) {
-    return Row(
-      spacing: 8,
-      children: [
-        const SizedBox(width: 8),
-        // Week navigation
-        IconButton(
-          onPressed: week > 1 ? () => _changeWeek(week - 1) : null,
-          icon: const Icon(Icons.chevron_left, size: 20),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-        ),
-        GestureDetector(
-          onTap: () => _goToCurrentWeek(),
-          child: TitleText(l10n.currentWeek(week)),
-        ),
-        IconButton(
-          onPressed: week < totalWeeks ? () => _changeWeek(week + 1) : null,
-          icon: const Icon(Icons.chevron_right, size: 20),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-        ),
-        const Expanded(child: SizedBox()),
-        IconButton(
-          onPressed: _showSchedulePicker,
-          icon: const Icon(Icons.list_alt_rounded),
-        ),
-        IconButton(
-          onPressed: _onAddCourse,
-          icon: const Icon(Icons.add),
-        ),
-        IconButton(
-          onPressed: _onImport,
-          icon: const Icon(Icons.download),
-        ),
-        IconButton(
-          onPressed: _onExport,
-          icon: const Icon(Icons.send),
-        ),
-        const SizedBox(width: 8),
-      ],
+    final config = courseProvider.scheduleConfig.value;
+    final scheduleName = config.semesterName.isEmpty ? '默认课表' : config.semesterName;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center, // 确保垂直居中
+        children: [
+          // Left: Week navigation
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: week > 1 ? () => _changeWeek(week - 1) : null,
+                icon: const Icon(Icons.chevron_left, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 36),
+              ),
+              GestureDetector(
+                onTap: () => _goToCurrentWeek(),
+                child: Text(
+                  l10n.currentWeek(week),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              IconButton(
+                onPressed: week < totalWeeks ? () => _changeWeek(week + 1) : null,
+                icon: const Icon(Icons.chevron_right, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 36),
+              ),
+            ],
+          ),
+          
+          // Center: Schedule Name (Horizontal Center)
+          Expanded(
+            child: Center(
+              child: Text(
+                scheduleName,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          
+          // Right: Action buttons
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: _showSchedulePicker,
+                icon: const Icon(Icons.list_alt_rounded, size: 20),
+                tooltip: '课表管理',
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
+              IconButton(
+                onPressed: _onImport,
+                icon: const Icon(Icons.download, size: 20),
+                tooltip: l10n.importSchedule,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
+              IconButton(
+                onPressed: _onExport,
+                icon: const Icon(Icons.send, size: 20),
+                tooltip: '导出课表',
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
+              IconButton(
+                onPressed: _onAddCourse,
+                icon: const Icon(Icons.add, size: 20),
+                tooltip: '添加课程',
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

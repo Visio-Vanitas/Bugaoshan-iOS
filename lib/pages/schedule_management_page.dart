@@ -113,7 +113,10 @@ class ScheduleManagementPage extends StatelessWidget {
                   }
                   return;
                 }
-                final newConfig = ScheduleConfig(
+                
+                // 复用当前选中的课表配置（TimeSlot 等）
+                final currentConfig = courseProvider.scheduleConfig.value;
+                final newConfig = currentConfig.copyWith(
                   id: DateTime.now().millisecondsSinceEpoch.toString(),
                   semesterName: newName,
                   semesterStartDate: DateTime.now(),

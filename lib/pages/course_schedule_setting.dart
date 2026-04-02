@@ -17,7 +17,6 @@ class CourseScheduleSetting extends StatefulWidget {
 class _CourseScheduleSettingState extends State<CourseScheduleSetting> {
   final courseProvider = getIt<CourseProvider>();
 
-  late TextEditingController _semesterNameController;
   late DateTime _startDate;
   late int _totalWeeks;
   late int _morningSections;
@@ -35,7 +34,6 @@ class _CourseScheduleSettingState extends State<CourseScheduleSetting> {
   void initState() {
     super.initState();
     final config = courseProvider.scheduleConfig.value;
-    _semesterNameController = TextEditingController(text: config.semesterName);
     _startDate = config.semesterStartDate;
     _totalWeeks = config.totalWeeks;
     _morningSections = config.morningSections;
@@ -52,7 +50,6 @@ class _CourseScheduleSettingState extends State<CourseScheduleSetting> {
 
   @override
   void dispose() {
-    _semesterNameController.dispose();
     super.dispose();
   }
 
@@ -78,13 +75,6 @@ class _CourseScheduleSettingState extends State<CourseScheduleSetting> {
           children: [
             // Semester config section
             _SectionTitle(l10n.semesterConfig),
-            TextFormField(
-              controller: _semesterNameController,
-              decoration: InputDecoration(
-                labelText: l10n.semesterName,
-                border: const OutlineInputBorder(),
-              ),
-            ),
             _DatePickerField(
               label: l10n.semesterStartDate,
               date: _startDate,
@@ -265,8 +255,8 @@ class _CourseScheduleSettingState extends State<CourseScheduleSetting> {
   }
 
   Future<void> _save() async {
-    final config = ScheduleConfig(
-      semesterName: _semesterNameController.text.trim(),
+    final currentConfig = courseProvider.scheduleConfig.value;
+    final config = currentConfig.copyWith(
       semesterStartDate: _startDate,
       totalWeeks: _totalWeeks,
       morningSections: _morningSections,
