@@ -31,29 +31,25 @@ class MyApp extends StatelessWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       title: 'Rubbish Plan',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: appConfigService.themeColor.value,
-        ),
-        appBarTheme: const AppBarTheme(
-          toolbarHeight: 48,
-          centerTitle: true,
-          scrolledUnderElevation: 0,
-        ),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: appConfigService.themeColor.value,
-          brightness: Brightness.dark,
-        ),
-        appBarTheme: const AppBarTheme(
-          toolbarHeight: 48,
-          centerTitle: true,
-          scrolledUnderElevation: 0,
-        ),
-      ),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
       themeMode: ThemeMode.system,
       home: HomePage(),
+    );
+  }
+
+  ThemeData _buildTheme(Brightness brightness) {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: appConfigService.themeColor.value,
+        brightness: brightness,
+      ),
+      appBarTheme: const AppBarTheme(
+        toolbarHeight: 48,
+        centerTitle: true,
+        scrolledUnderElevation: 0,
+      ),
+      navigationBarTheme: const NavigationBarThemeData(height: 64),
     );
   }
 }

@@ -12,7 +12,8 @@ class CourseProvider {
   final ValueNotifier<List<Course>> courses = ValueNotifier<List<Course>>([]);
   final ValueNotifier<ScheduleConfig> scheduleConfig =
       ValueNotifier<ScheduleConfig>(_defaultConfig());
-  final ValueNotifier<List<ScheduleConfig>> allSchedules = ValueNotifier<List<ScheduleConfig>>([]);
+  final ValueNotifier<List<ScheduleConfig>> allSchedules =
+      ValueNotifier<List<ScheduleConfig>>([]);
   final ValueNotifier<int> currentWeek = ValueNotifier<int>(1);
   final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
 
@@ -68,8 +69,8 @@ class CourseProvider {
   }
 
   bool isScheduleNameTaken(String name, {String? excludeId}) {
-    return allSchedules.value.any((s) => 
-      s.semesterName.trim() == name.trim() && s.id != excludeId
+    return allSchedules.value.any(
+      (s) => s.semesterName.trim() == name.trim() && s.id != excludeId,
     );
   }
 
@@ -79,8 +80,9 @@ class CourseProvider {
 
   /// Check if a course conflicts with existing courses (excluding a specific course by id)
   bool hasConflictSync(Course course, {String? excludeId}) {
-    return courses.value
-        .any((c) => c.conflictsWith(course, excludeId: excludeId));
+    return courses.value.any(
+      (c) => c.conflictsWith(course, excludeId: excludeId),
+    );
   }
 
   /// Async conflict check using database query

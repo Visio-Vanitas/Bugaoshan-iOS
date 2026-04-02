@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:rubbish_plan/l10n/app_localizations.dart';
 import 'package:rubbish_plan/pages/course_page.dart';
 import 'package:rubbish_plan/pages/profile_page.dart';
@@ -93,7 +93,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   )
                   .toList(),
-              backgroundColor: Theme.of(context).colorScheme.surface,
             ),
           );
         }
