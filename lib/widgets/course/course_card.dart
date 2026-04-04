@@ -40,26 +40,25 @@ class CourseCard extends StatelessWidget {
         const textColor = Colors.white;
         final fontSize = appConfig.courseCardFontSize.value;
         final smallFontSize = fontSize - 1;
-        final details =
-            <({IconData icon, String text, bool shrinkToFitHorizontally})>[
-              if (config.showLocation && course.location.isNotEmpty)
-                (
-                  icon: Icons.location_on_outlined,
-                  text: course.location,
-                  shrinkToFitHorizontally: true,
-                ),
-              if (config.showTeacherName && course.teacher.isNotEmpty)
-                (
-                  icon: Icons.person_outline,
-                  text: course.teacher,
-                  shrinkToFitHorizontally: false,
-                ),
-              (
-                icon: Icons.calendar_today_outlined,
-                text: '${course.startWeek}-${course.endWeek}${l10n.week}',
-                shrinkToFitHorizontally: false,
-              ),
-            ];
+        final details = <({IconData icon, String text, int preferredMaxLines})>[
+          if (config.showLocation && course.location.isNotEmpty)
+            (
+              icon: Icons.location_on_outlined,
+              text: course.location,
+              preferredMaxLines: 2,
+            ),
+          if (config.showTeacherName && course.teacher.isNotEmpty)
+            (
+              icon: Icons.person_outline,
+              text: course.teacher,
+              preferredMaxLines: 1,
+            ),
+          (
+            icon: Icons.calendar_today_outlined,
+            text: '${course.startWeek}-${course.endWeek}${l10n.week}',
+            preferredMaxLines: 1,
+          ),
+        ];
 
         return GestureDetector(
           onTap: onTap,
@@ -67,14 +66,24 @@ class CourseCard extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final height = constraints.maxHeight;
-              final maxDetailCount = switch (height) {
+              final detailLineBudget = switch (height) {
                 < 56 => 0,
-                < 78 => 1,
                 < 100 => 2,
-                _ => 3,
+                _ => 4,
               };
-              final visibleDetails = details.take(maxDetailCount).toList();
-              final titleMaxLines = maxDetailCount == 0 ? 3 : 2;
+              final visibleDetails =
+                  <({IconData icon, String text, int preferredMaxLines})>[];
+              var usedDetailLines = 0;
+              for (final detail in details) {
+                final nextUsedLines =
+                    usedDetailLines + detail.preferredMaxLines;
+                if (nextUsedLines > detailLineBudget) {
+                  continue;
+                }
+                visibleDetails.add(detail);
+                usedDetailLines = nextUsedLines;
+              }
+              final titleMaxLines = 6;
 
               return ClipRRect(
                 borderRadius: BorderRadius.circular(6),
@@ -98,7 +107,6 @@ class CourseCard extends StatelessWidget {
                               ? course.name
                               : '${l10n.notThisWeek} ${course.name}',
                           maxLines: titleMaxLines,
-                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: fontSize,
                             fontWeight: FontWeight.bold,
@@ -114,8 +122,7 @@ class CourseCard extends StatelessWidget {
                             detail.text,
                             smallFontSize,
                             textColor,
-                            shrinkToFitHorizontally:
-                                detail.shrinkToFitHorizontally,
+                            maxLines: detail.preferredMaxLines,
                           ),
                         ),
                       ],
@@ -135,7 +142,7 @@ class CourseCard extends StatelessWidget {
     String text,
     double fontSize,
     Color color, {
-    bool shrinkToFitHorizontally = false,
+    int maxLines = 1,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
@@ -146,32 +153,15 @@ class CourseCard extends StatelessWidget {
           Icon(icon, size: fontSize, color: color.withAlpha(200)),
           const SizedBox(width: 2),
           Expanded(
-            child: shrinkToFitHorizontally
-                ? SizedBox(
-                    height: fontSize * 1.2,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        text,
-                        style: TextStyle(
-                          fontSize: fontSize,
-                          color: color.withAlpha(230),
-                          height: 1.1,
-                        ),
-                      ),
-                    ),
-                  )
-                : Text(
-                    text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      color: color.withAlpha(230),
-                      height: 1.1,
-                    ),
-                  ),
+            child: Text(
+              text,
+              maxLines: maxLines,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: color.withAlpha(230),
+                height: 1.1,
+              ),
+            ),
           ),
         ],
       ),
