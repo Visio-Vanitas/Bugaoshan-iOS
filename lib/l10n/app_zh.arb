@@ -134,5 +134,10 @@
     "evening": "晚上",
     "courseDuration": "单节课程时长 (分钟)",
     "breakDuration": "课间休息时长 (分钟)",
-    "autoSyncTime": "自动推算后续时间"
+    "autoSyncTime": "自动推算后续时间",
+    "scuLogin": "四川大学统一身份认证登录",
+    "loggedIn": "已登录",
+    "notLoggedIn": "未登录",
+    "logout": "退出登录",
+    "logoutConfirm": "确定要退出登录吗？"
 }

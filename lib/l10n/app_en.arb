@@ -134,5 +134,10 @@
     "evening": "Evening",
     "courseDuration": "Course Duration (mins)",
     "breakDuration": "Break Duration (mins)",
-    "autoSyncTime": "Auto-calculate subsequent times"
+    "autoSyncTime": "Auto-calculate subsequent times",
+    "scuLogin": "SCU Unified Identity Login",
+    "loggedIn": "Logged In",
+    "notLoggedIn": "Not Logged In",
+    "logout": "Logout",
+    "logoutConfirm": "Are you sure you want to logout?"
 }

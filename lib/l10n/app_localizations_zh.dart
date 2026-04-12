@@ -432,6 +432,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get autoSyncTime => '自动推算后续时间';
+
+  @override
+  String get scuLogin => '四川大学统一身份认证登录';
+
+  @override
+  String get loggedIn => '已登录';
+
+  @override
+  String get notLoggedIn => '未登录';
+
+  @override
+  String get logout => '退出登录';
+
+  @override
+  String get logoutConfirm => '确定要退出登录吗？';
 }
 
 /// The translations for Chinese, as used in China, using the Han script (`zh_Hans_CN`).

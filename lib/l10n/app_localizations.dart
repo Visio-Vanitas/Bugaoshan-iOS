@@ -912,6 +912,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Auto-calculate subsequent times'**
   String get autoSyncTime;
+
+  /// No description provided for @scuLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'SCU Unified Identity Login'**
+  String get scuLogin;
+
+  /// No description provided for @loggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged In'**
+  String get loggedIn;
+
+  /// No description provided for @notLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Logged In'**
+  String get notLoggedIn;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @logoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutConfirm;
 }
 
 class _AppLocalizationsDelegate

@@ -441,4 +441,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autoSyncTime => 'Auto-calculate subsequent times';
+
+  @override
+  String get scuLogin => 'SCU Unified Identity Login';
+
+  @override
+  String get loggedIn => 'Logged In';
+
+  @override
+  String get notLoggedIn => 'Not Logged In';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get logoutConfirm => 'Are you sure you want to logout?';
 }
