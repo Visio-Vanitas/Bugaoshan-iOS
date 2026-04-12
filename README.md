@@ -28,7 +28,13 @@
 - **成绩统计** — 查看个人成绩，直观了解学业情况
 - **更多便捷功能** — 持续迭代中，更多校园实用工具即将上线
 
----
+<div align="center">
+  <img src="./docs/campus.png" width="30%" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="./docs/course.png" width="30%" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="./docs/score.png" width="30%" />
+</div>
 
 ## 🚀 快速开始
 
