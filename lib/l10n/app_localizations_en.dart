@@ -602,4 +602,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String termPassedSummary(Object count, Object credits) {
     return '$count courses · $credits cr.';
   }
+
+  @override
+  String get sessionExpiredTitle => 'Session Expired';
+
+  @override
+  String get sessionExpiredMessage =>
+      'Your login session has expired. Please login again to continue using this feature.';
+
+  @override
+  String get relogin => 'Login Again';
 }

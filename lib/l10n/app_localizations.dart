@@ -1212,6 +1212,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} courses · {credits} cr.'**
   String termPassedSummary(Object count, Object credits);
+
+  /// No description provided for @sessionExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Expired'**
+  String get sessionExpiredTitle;
+
+  /// No description provided for @sessionExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your login session has expired. Please login again to continue using this feature.'**
+  String get sessionExpiredMessage;
+
+  /// No description provided for @relogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Again'**
+  String get relogin;
 }
 
 class _AppLocalizationsDelegate

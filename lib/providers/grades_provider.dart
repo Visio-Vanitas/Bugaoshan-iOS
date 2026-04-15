@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Bugaoshan/models/scheme_score.dart';
 import 'package:Bugaoshan/providers/scu_auth_provider.dart';
 import 'package:Bugaoshan/serivces/scu_auth_service.dart';
+import 'package:Bugaoshan/utils/session_expiry_handler.dart';
 
 const _keySchemeScores = 'grades_scheme_scores';
 const _keyPassingScores = 'grades_passing_scores';
@@ -56,7 +57,7 @@ class GradesProvider extends ChangeNotifier {
       await _prefs.setString(_keySchemeScores, jsonEncode(data));
     } on ScuLoginException catch (e) {
       if (e.sessionExpired) {
-        await _authProvider.logout();
+        await SessionExpiryHandler.handle(_authProvider);
       }
       _schemeState = GradesLoadState.error;
       _schemeError = e.toString();
@@ -88,7 +89,7 @@ class GradesProvider extends ChangeNotifier {
       await _prefs.setString(_keyPassingScores, jsonEncode(data));
     } on ScuLoginException catch (e) {
       if (e.sessionExpired) {
-        await _authProvider.logout();
+        await SessionExpiryHandler.handle(_authProvider);
       }
       _passingState = GradesLoadState.error;
       _passingError = e.toString();

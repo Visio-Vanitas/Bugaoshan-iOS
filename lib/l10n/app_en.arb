@@ -191,5 +191,8 @@
     "termCount": "Terms",
     "accumulatedCredits": "Total Credits",
     "creditUnit": "{credit} cr.",
-    "termPassedSummary": "{count} courses · {credits} cr."
+    "termPassedSummary": "{count} courses · {credits} cr.",
+    "sessionExpiredTitle": "Session Expired",
+    "sessionExpiredMessage": "Your login session has expired. Please login again to continue using this feature.",
+    "relogin": "Login Again"
 }

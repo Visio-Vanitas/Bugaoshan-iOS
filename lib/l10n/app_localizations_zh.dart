@@ -590,6 +590,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String termPassedSummary(Object count, Object credits) {
     return '$count 门 · $credits 学分';
   }
+
+  @override
+  String get sessionExpiredTitle => '会话已过期';
+
+  @override
+  String get sessionExpiredMessage => '登录会话已过期，请重新登录后继续使用该功能。';
+
+  @override
+  String get relogin => '重新登录';
 }
 
 /// The translations for Chinese, as used in China, using the Han script (`zh_Hans_CN`).

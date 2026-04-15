@@ -6,6 +6,7 @@ import 'package:Bugaoshan/models/course.dart';
 import 'package:Bugaoshan/providers/course_provider.dart';
 import 'package:Bugaoshan/providers/scu_auth_provider.dart';
 import 'package:Bugaoshan/serivces/scu_auth_service.dart';
+import 'package:Bugaoshan/utils/session_expiry_handler.dart';
 import 'package:Bugaoshan/widgets/dialog/dialog.dart';
 import 'package:Bugaoshan/widgets/route/router_utils.dart';
 
@@ -216,7 +217,7 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
     try {
       semesters = await authProvider.service.fetchSemesters();
     } on ScuLoginException catch (e) {
-      if (e.sessionExpired) await authProvider.logout();
+      if (e.sessionExpired) await SessionExpiryHandler.handle(authProvider);
       if (mounted) showInfoDialog(title: l10n.importFailed, content: e.message);
       if (mounted) setState(() => _loading = false);
       return;
@@ -346,7 +347,7 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
       }
     } on ScuLoginException catch (e) {
       if (e.sessionExpired) {
-        await authProvider.logout();
+        await SessionExpiryHandler.handle(authProvider);
       }
       if (mounted) showInfoDialog(title: l10n.importFailed, content: e.message);
     } catch (e) {
