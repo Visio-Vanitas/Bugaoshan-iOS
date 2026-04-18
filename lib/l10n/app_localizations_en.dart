@@ -796,5 +796,83 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ccylBindHelp => 'Click button to bind automatically';
 
   @override
+  String get ccylActivitySeries => 'Activity Series';
+
+  @override
+  String get ccylActivityDetail => 'Activity Detail';
+
+  @override
+  String get ccylActivityInfo => 'Activity Info';
+
+  @override
+  String get ccylTimeInfo => 'Time Info';
+
+  @override
+  String get ccylLocationInfo => 'Location Info';
+
+  @override
+  String get ccylContactInfo => 'Contact Info';
+
+  @override
+  String get ccylStarLevel => 'Star Level';
+
+  @override
+  String get ccylQuality => 'Quality';
+
+  @override
+  String get ccylScoreType => 'Score Type';
+
+  @override
+  String get ccylLiablePerson => 'Liable Person';
+
+  @override
+  String get ccylLiablePhone => 'Contact Phone';
+
+  @override
+  String get ccylLiableTeacher => 'Liable Teacher';
+
+  @override
+  String get ccylLiableTeacherPhone => 'Liable Teacher Phone';
+
+  @override
+  String get ccylActivities => 'Activities';
+
+  @override
+  String get ccylQuota => 'Quota';
+
+  @override
+  String get ccylActivityTarget => 'Activity Target';
+
+  @override
+  String get ccylActivityTime => 'Activity Time';
+
+  @override
+  String get ccylEnrollTime => 'Enrollment Time';
+
+  @override
+  String get ccylActivityAddress => 'Activity Address';
+
+  @override
+  String get ccylContactPhone => 'Contact Phone';
+
+  @override
+  String get ccylSignIn => 'Sign In';
+
+  @override
+  String get ccylSignOut => 'Sign Out';
+
+  @override
+  String get ccylEnabled => 'Enabled';
+
+  @override
+  String get ccylDisabled => 'Disabled';
+
+  @override
+  String get ccylSeriesName => 'Series Name';
+
+  @override
+  String get ccylOrganizer => 'Organizer';
+
+  @override
   String get noData => 'No Data';
 }

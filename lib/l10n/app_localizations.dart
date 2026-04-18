@@ -1585,6 +1585,162 @@ abstract class AppLocalizations {
   /// **'Click button to bind automatically'**
   String get ccylBindHelp;
 
+  /// No description provided for @ccylActivitySeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Series'**
+  String get ccylActivitySeries;
+
+  /// No description provided for @ccylActivityDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Detail'**
+  String get ccylActivityDetail;
+
+  /// No description provided for @ccylActivityInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Info'**
+  String get ccylActivityInfo;
+
+  /// No description provided for @ccylTimeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Info'**
+  String get ccylTimeInfo;
+
+  /// No description provided for @ccylLocationInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Info'**
+  String get ccylLocationInfo;
+
+  /// No description provided for @ccylContactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Info'**
+  String get ccylContactInfo;
+
+  /// No description provided for @ccylStarLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Star Level'**
+  String get ccylStarLevel;
+
+  /// No description provided for @ccylQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get ccylQuality;
+
+  /// No description provided for @ccylScoreType.
+  ///
+  /// In en, this message translates to:
+  /// **'Score Type'**
+  String get ccylScoreType;
+
+  /// No description provided for @ccylLiablePerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Liable Person'**
+  String get ccylLiablePerson;
+
+  /// No description provided for @ccylLiablePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Phone'**
+  String get ccylLiablePhone;
+
+  /// No description provided for @ccylLiableTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Liable Teacher'**
+  String get ccylLiableTeacher;
+
+  /// No description provided for @ccylLiableTeacherPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Liable Teacher Phone'**
+  String get ccylLiableTeacherPhone;
+
+  /// No description provided for @ccylActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get ccylActivities;
+
+  /// No description provided for @ccylQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Quota'**
+  String get ccylQuota;
+
+  /// No description provided for @ccylActivityTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Target'**
+  String get ccylActivityTarget;
+
+  /// No description provided for @ccylActivityTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Time'**
+  String get ccylActivityTime;
+
+  /// No description provided for @ccylEnrollTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment Time'**
+  String get ccylEnrollTime;
+
+  /// No description provided for @ccylActivityAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Address'**
+  String get ccylActivityAddress;
+
+  /// No description provided for @ccylContactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Phone'**
+  String get ccylContactPhone;
+
+  /// No description provided for @ccylSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get ccylSignIn;
+
+  /// No description provided for @ccylSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get ccylSignOut;
+
+  /// No description provided for @ccylEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get ccylEnabled;
+
+  /// No description provided for @ccylDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get ccylDisabled;
+
+  /// No description provided for @ccylSeriesName.
+  ///
+  /// In en, this message translates to:
+  /// **'Series Name'**
+  String get ccylSeriesName;
+
+  /// No description provided for @ccylOrganizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get ccylOrganizer;
+
   /// No description provided for @noData.
   ///
   /// In en, this message translates to:

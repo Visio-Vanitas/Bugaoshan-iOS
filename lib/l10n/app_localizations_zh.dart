@@ -778,6 +778,84 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ccylBindHelp => '点击按钮自动完成绑定';
 
   @override
+  String get ccylActivitySeries => '活动系列';
+
+  @override
+  String get ccylActivityDetail => '活动详情';
+
+  @override
+  String get ccylActivityInfo => '活动信息';
+
+  @override
+  String get ccylTimeInfo => '时间信息';
+
+  @override
+  String get ccylLocationInfo => '地点信息';
+
+  @override
+  String get ccylContactInfo => '联系信息';
+
+  @override
+  String get ccylStarLevel => '星级';
+
+  @override
+  String get ccylQuality => '性质';
+
+  @override
+  String get ccylScoreType => '积分类型';
+
+  @override
+  String get ccylLiablePerson => '负责人';
+
+  @override
+  String get ccylLiablePhone => '联系电话';
+
+  @override
+  String get ccylLiableTeacher => '指导老师';
+
+  @override
+  String get ccylLiableTeacherPhone => '指导老师电话';
+
+  @override
+  String get ccylActivities => '系列活动';
+
+  @override
+  String get ccylQuota => '名额';
+
+  @override
+  String get ccylActivityTarget => '活动对象';
+
+  @override
+  String get ccylActivityTime => '活动时间';
+
+  @override
+  String get ccylEnrollTime => '报名时间';
+
+  @override
+  String get ccylActivityAddress => '活动地点';
+
+  @override
+  String get ccylContactPhone => '联系电话';
+
+  @override
+  String get ccylSignIn => '签到';
+
+  @override
+  String get ccylSignOut => '签退';
+
+  @override
+  String get ccylEnabled => '开启';
+
+  @override
+  String get ccylDisabled => '关闭';
+
+  @override
+  String get ccylSeriesName => '系列名称';
+
+  @override
+  String get ccylOrganizer => '主办单位';
+
+  @override
   String get noData => '暂无数据';
 }
 

@@ -183,6 +183,85 @@ class CcylService {
         .toList();
   }
 
+  Future<
+    ({
+      CyclActivityLib activityLib,
+      List<CyclActivity> activities,
+      bool subscribed,
+    })
+  >
+  getActivityLibDetail(String activityLibraryId) async {
+    final resp = await http.get(
+      Uri.parse('$_apiBase/app/activity/get-lib-detail/$activityLibraryId'),
+      headers: _authHeaders(),
+    );
+    dev.log(
+      '[CCYL] activity lib detail response: ${resp.body}',
+      name: 'CcylService',
+    );
+
+    final json = _parseJson(resp.body, 'get-lib-detail');
+    if (json['code'] != 0) {
+      final msg = json['msg']?.toString() ?? '获取活动系列详情失败';
+      throw CcylException(msg);
+    }
+
+    final activityLibJson = json['activityLib'] as Map<String, dynamic>?;
+    final activitiesJson = json['activities'] as List<dynamic>?;
+    final subscribed = json['subscribed'] == true;
+
+    if (activityLibJson == null) {
+      throw const CcylException('活动系列数据缺失');
+    }
+
+    return (
+      activityLib: CyclActivityLib.fromJson(activityLibJson),
+      activities:
+          activitiesJson
+              ?.map((e) => CyclActivity.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      subscribed: subscribed,
+    );
+  }
+
+  Future<
+    ({CyclActivity activity, CyclActivityLib? activityLib, bool isXtwRole})
+  >
+  getActivityDetail(String activityId) async {
+    final resp = await http.post(
+      Uri.parse('$_apiBase/app/activity/get-detail'),
+      headers: _authHeaders(),
+      body: jsonEncode({'activityId': activityId}),
+    );
+    dev.log(
+      '[CCYL] activity detail response: ${resp.body}',
+      name: 'CcylService',
+    );
+
+    final json = _parseJson(resp.body, 'get-detail');
+    if (json['code'] != 0) {
+      final msg = json['msg']?.toString() ?? '获取活动详情失败';
+      throw CcylException(msg);
+    }
+
+    final activityJson = json['activity'] as Map<String, dynamic>?;
+    final activityLibJson = json['activityLib'] as Map<String, dynamic>?;
+    final isXtwRole = json['isXtwRole'] == true;
+
+    if (activityJson == null) {
+      throw const CcylException('活动数据缺失');
+    }
+
+    return (
+      activity: CyclActivity.fromJson(activityJson),
+      activityLib: activityLibJson != null
+          ? CyclActivityLib.fromJson(activityLibJson)
+          : null,
+      isXtwRole: isXtwRole,
+    );
+  }
+
   Future<Map<String, List<CyclDict>>> getDicts(List<String> groupCodes) async {
     final results = <String, List<CyclDict>>{};
 
@@ -226,6 +305,7 @@ class CcylService {
 }
 
 class CyclActivity {
+  final String? activityId;
   final String activityLibraryId;
   final String orgNo;
   final String name;
@@ -242,6 +322,7 @@ class CyclActivity {
   final String? enrollEndTime;
   final int quota;
   final String activityTarget;
+  final String? activityTargetName;
   final String isSignIn;
   final String isSignOut;
   final String? mobile;
@@ -258,6 +339,7 @@ class CyclActivity {
   final bool subscribed;
 
   CyclActivity({
+    this.activityId,
     required this.activityLibraryId,
     required this.orgNo,
     required this.name,
@@ -274,6 +356,7 @@ class CyclActivity {
     this.enrollEndTime,
     required this.quota,
     required this.activityTarget,
+    this.activityTargetName,
     required this.isSignIn,
     required this.isSignOut,
     this.mobile,
@@ -292,6 +375,7 @@ class CyclActivity {
 
   factory CyclActivity.fromJson(Map<String, dynamic> json) {
     return CyclActivity(
+      activityId: json['activityId']?.toString(),
       activityLibraryId: json['activityLibraryId']?.toString() ?? '',
       orgNo: json['orgNo']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -314,6 +398,7 @@ class CyclActivity {
           ? json['quota']
           : int.tryParse(json['quota']?.toString() ?? '0') ?? 0,
       activityTarget: json['activityTarget']?.toString() ?? '',
+      activityTargetName: json['activityTargetName']?.toString(),
       isSignIn: json['isSignIn']?.toString() ?? '0',
       isSignOut: json['isSignOut']?.toString() ?? '0',
       mobile: json['mobile']?.toString(),
@@ -407,4 +492,117 @@ class CcylException implements Exception {
   const CcylException(this.message);
   @override
   String toString() => message;
+}
+
+class CyclActivityLib {
+  final String activityLibraryId;
+  final String orgNo;
+  final String name;
+  final String level;
+  final String star;
+  final String? activityType;
+  final List<String> quality;
+  final double classHour;
+  final String? classCredit;
+  final String? avgRank;
+  final String? isPrize;
+  final int prizeClassHour;
+  final String? describe;
+  final String scoringMode;
+  final String creator;
+  final String createTime;
+  final String? updater;
+  final String? updateTime;
+  final bool isDelete;
+  final String liablePer;
+  final String liablePerPhone;
+  final String liableTer;
+  final String liableTerPhone;
+  final double instructorHour;
+  final String orgName;
+  final String? levelName;
+  final String? starName;
+  final String? activityTypeName;
+  final String? doing;
+  final String? subscribed;
+  final String? scoreTypeNames;
+  final String? qualityName;
+
+  CyclActivityLib({
+    required this.activityLibraryId,
+    required this.orgNo,
+    required this.name,
+    required this.level,
+    required this.star,
+    this.activityType,
+    required this.quality,
+    required this.classHour,
+    this.classCredit,
+    this.avgRank,
+    this.isPrize,
+    required this.prizeClassHour,
+    this.describe,
+    required this.scoringMode,
+    required this.creator,
+    required this.createTime,
+    this.updater,
+    this.updateTime,
+    required this.isDelete,
+    required this.liablePer,
+    required this.liablePerPhone,
+    required this.liableTer,
+    required this.liableTerPhone,
+    required this.instructorHour,
+    required this.orgName,
+    this.levelName,
+    this.starName,
+    this.activityTypeName,
+    this.doing,
+    this.subscribed,
+    this.scoreTypeNames,
+    this.qualityName,
+  });
+
+  factory CyclActivityLib.fromJson(Map<String, dynamic> json) {
+    return CyclActivityLib(
+      activityLibraryId: json['activityLibraryId']?.toString() ?? '',
+      orgNo: json['orgNo']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      level: json['level']?.toString() ?? '',
+      star: json['star']?.toString() ?? '',
+      activityType: json['activityType']?.toString(),
+      quality:
+          (json['quality'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      classHour: (json['classHour'] as num?)?.toDouble() ?? 0.0,
+      classCredit: json['classCredit']?.toString(),
+      avgRank: json['avgRank']?.toString(),
+      isPrize: json['isPrize']?.toString(),
+      prizeClassHour: json['prizeClassHour'] is int
+          ? json['prizeClassHour']
+          : int.tryParse(json['prizeClassHour']?.toString() ?? '0') ?? 0,
+      describe: json['describe']?.toString(),
+      scoringMode: json['scoringMode']?.toString() ?? '',
+      creator: json['creator']?.toString() ?? '',
+      createTime: json['createTime']?.toString() ?? '',
+      updater: json['updater']?.toString(),
+      updateTime: json['updateTime']?.toString(),
+      isDelete: json['isDelete'] == true,
+      liablePer: json['liablePer']?.toString() ?? '',
+      liablePerPhone: json['liablePerPhone']?.toString() ?? '',
+      liableTer: json['liableTer']?.toString() ?? '',
+      liableTerPhone: json['liableTerPhone']?.toString() ?? '',
+      instructorHour: (json['instructorHour'] as num?)?.toDouble() ?? 0.0,
+      orgName: json['orgName']?.toString() ?? '',
+      levelName: json['levelName']?.toString(),
+      starName: json['starName']?.toString(),
+      activityTypeName: json['activityTypeName']?.toString(),
+      doing: json['doing']?.toString(),
+      subscribed: json['subscribed']?.toString(),
+      scoreTypeNames: json['scoreTypeNames']?.toString(),
+      qualityName: json['qualityName']?.toString(),
+    );
+  }
 }
