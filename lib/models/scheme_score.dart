@@ -89,8 +89,18 @@ class SchemeScoreSummary {
       final key = '${item.academicYearCode} ${item.termName}学期';
       map.putIfAbsent(key, () => []).add(item);
     }
-    // 按学年倒序排列
-    final keys = map.keys.toList()..sort((a, b) => b.compareTo(a));
+    final keys = map.keys.toList()
+      ..sort((a, b) {
+        final yearA = a.substring(0, 9);
+        final yearB = b.substring(0, 9);
+        final cmp = yearB.compareTo(yearA);
+        if (cmp != 0) return cmp;
+        final isSpringA = a.contains('春');
+        final isSpringB = b.contains('春');
+        if (isSpringA && !isSpringB) return -1;
+        if (!isSpringA && isSpringB) return 1;
+        return 0;
+      });
     return keys.map((k) => (label: k, items: map[k]!)).toList();
   }
 
