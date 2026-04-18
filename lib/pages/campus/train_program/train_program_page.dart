@@ -689,7 +689,7 @@ class _TrainProgramDetailPageState extends State<TrainProgramDetailPage> {
                   _buildCourseInfoRow(context, '考核方式', kc.kslxmc),
                   _buildCourseInfoRow(context, '教学方式', kc.jxfssm),
                   _buildCourseHoursRow(context),
-                  _buildCourseInfoRow(context, '建议修读年级', kc.nrjj),
+                  _buildCourseInfoRow(context, '内容简介', kc.nrjj),
                 ],
               ),
             ),
