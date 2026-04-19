@@ -46,6 +46,7 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
 
   Future<void> _loadActivities({bool loadMore = false}) async {
     if (_loading) return;
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;

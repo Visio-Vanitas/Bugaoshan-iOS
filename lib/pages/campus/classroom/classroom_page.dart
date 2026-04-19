@@ -29,17 +29,20 @@ class _ClassroomPageState extends State<ClassroomPage> {
   }
 
   Future<void> _loadBuildings() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _error = null;
     });
     try {
       _buildings = await _apiService.fetchBuildings();
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _isInitialLoad = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e is CampusNetworkException
             ? 'campusNetworkRequired'
@@ -51,6 +54,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
   }
 
   Future<void> _queryBuilding(BuildingModel building) async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _selectedBuilding = building;
@@ -58,10 +62,12 @@ class _ClassroomPageState extends State<ClassroomPage> {
     });
     try {
       _roomResult = await _apiService.fetchRoomData(building.location);
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e is CampusNetworkException
             ? 'campusNetworkRequired'

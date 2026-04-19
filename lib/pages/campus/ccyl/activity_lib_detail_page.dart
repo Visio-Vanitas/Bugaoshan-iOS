@@ -28,6 +28,7 @@ class _ActivityLibDetailPageState extends State<ActivityLibDetailPage> {
   }
 
   Future<void> _loadData() async {
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -38,6 +39,7 @@ class _ActivityLibDetailPageState extends State<ActivityLibDetailPage> {
       final result = await provider.service.getActivityLibDetail(
         widget.activityLibraryId,
       );
+      if (!mounted) return;
       setState(() {
         _activityLib = result.activityLib;
         _activities = result.activities;
@@ -45,6 +47,7 @@ class _ActivityLibDetailPageState extends State<ActivityLibDetailPage> {
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;

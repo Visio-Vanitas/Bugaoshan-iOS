@@ -44,6 +44,7 @@ class _MyActivitiesTabState extends State<MyActivitiesTab> {
 
   Future<void> _loadActivities({bool loadMore = false}) async {
     if (_loading) return;
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -65,13 +66,17 @@ class _MyActivitiesTabState extends State<MyActivitiesTab> {
         _hasMore = results.length >= 10;
       });
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 

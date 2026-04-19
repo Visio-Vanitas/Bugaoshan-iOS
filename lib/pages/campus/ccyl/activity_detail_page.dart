@@ -26,6 +26,7 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
   }
 
   Future<void> _loadData() async {
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -36,12 +37,14 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
       final result = await provider.service.getActivityDetail(
         widget.activityId,
       );
+      if (!mounted) return;
       setState(() {
         _activity = result.activity;
         _activityLib = result.activityLib;
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;

@@ -17,6 +17,7 @@ class _CcylBindPageState extends State<CcylBindPage> {
   String? _error;
 
   Future<void> _doOAuthBind() async {
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -25,9 +26,11 @@ class _CcylBindPageState extends State<CcylBindPage> {
     try {
       final code = await _oauthService.getOAuthCode();
       if (code == null) {
-        setState(() {
-          _error = '获取授权码失败';
-        });
+        if (mounted) {
+          setState(() {
+            _error = '获取授权码失败';
+          });
+        }
         return;
       }
 
@@ -37,13 +40,17 @@ class _CcylBindPageState extends State<CcylBindPage> {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
