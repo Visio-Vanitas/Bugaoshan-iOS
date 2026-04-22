@@ -67,7 +67,7 @@ class ScheduleConfig {
     List<TimeSlot>? timeSlots,
     this.showTeacherName = true,
     this.showLocation = true,
-    this.showWeekend = true,
+    this.showWeekend = false,
   }) : timeSlots = timeSlots ?? _defaultTimeSlots(4, 5, 3, 45, 10);
 
   factory ScheduleConfig.fromJson(Map<String, dynamic> json) {
