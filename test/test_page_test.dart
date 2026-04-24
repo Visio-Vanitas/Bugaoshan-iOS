@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -23,7 +25,26 @@ Future<String> getLatestVersionFromGitHub(http.Client client) async {
 }
 
 String buildBinaryUrlForPlatform(String version, String platform) {
-  return 'https://github.com/The-Brotherhood-of-SCU/Bugaoshan/releases/download/v$version/bugaoshan_${version}_${platform}_x64.zip';
+  return 'https://github.com/The-Brotherhood-of-SCU/Bugaoshan/releases/download/v$version/bugaoshan_v${version}_${platform}_x64.zip';
+}
+
+Future<String?> getLatestPrereleaseFromGitHub(http.Client client) async {
+  const repo = 'The-Brotherhood-of-SCU/Bugaoshan';
+  final response = await client.get(
+    Uri.parse('https://api.github.com/repos/$repo/releases'),
+    headers: {'Accept': 'application/vnd.github+json'},
+  );
+  if (response.statusCode == 200) {
+    if (response.body.isEmpty) return null;
+    final List<dynamic> releases = jsonDecode(response.body);
+    for (final release in releases) {
+      if (release['prerelease'] == true && release['tag_name'] != null) {
+        return (release['tag_name'] as String).replaceFirst('v', '');
+      }
+    }
+    return null;
+  }
+  throw Exception('GitHub API error: ${response.statusCode}');
 }
 
 void main() {
@@ -94,6 +115,44 @@ void main() {
         getLatestVersionFromGitHub(mockClient),
         throwsA(isA<Exception>().having((e) => e.toString(), 'message', contains('403'))),
       );
+    });
+  });
+
+  group('getLatestPrereleaseFromGitHub', () {
+    test('parses prerelease version from releases list', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          '[{"tag_name": "v0.5.7", "prerelease": false}, {"tag_name": "v0.6.0-beta.1", "prerelease": true}]',
+          200,
+        );
+      });
+
+      final version = await getLatestPrereleaseFromGitHub(mockClient);
+      expect(version, '0.6.0-beta.1');
+    });
+
+    test('returns null when no prerelease found', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          '[{"tag_name": "v0.5.6", "prerelease": false}, {"tag_name": "v0.5.7", "prerelease": false}]',
+          200,
+        );
+      });
+
+      final version = await getLatestPrereleaseFromGitHub(mockClient);
+      expect(version, isNull);
+    });
+
+    test('returns first prerelease when multiple exist', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          '[{"tag_name": "v0.6.0-beta.2", "prerelease": true}, {"tag_name": "v0.6.0-beta.1", "prerelease": true}]',
+          200,
+        );
+      });
+
+      final version = await getLatestPrereleaseFromGitHub(mockClient);
+      expect(version, '0.6.0-beta.2');
     });
   });
 
