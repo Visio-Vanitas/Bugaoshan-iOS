@@ -1,0 +1,156 @@
+name: Build App
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "tag name"
+        required: false
+        type: string
+
+jobs:
+  build-android:
+    name: Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2.18.0
+        with:
+          flutter-version: "3.41.6"
+          channel: "stable"
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs || true
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/*.apk
+
+  release:
+    name: Release
+    needs: [ build-android ]
+    runs-on: ubuntu-latest
+    # 仅在推送 tag 或手动触发时运行
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name ==
+      'workflow_dispatch'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 必须设置为 0 才能获取所有历史用于生成日志
+
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: android-apk
+
+      - name: Get version and tags
+        id: vars
+        run: |
+          # 确定当前版本号（优先使用输入的 version，其次是 tag 名）
+          CURRENT_TAG="${{ github.event.inputs.version }}"
+          if [ -z "$CURRENT_TAG" ]; then
+            CURRENT_TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=${CURRENT_TAG}" >> "$GITHUB_OUTPUT"
+
+          # 获取上一个 tag 用于对比
+          PREV_TAG=$(git tag --sort=-version:refname \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | grep -v "^${CURRENT_TAG}$" \
+            | head -n 1 || true)
+
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+            echo "range=${PREV_TAG}..HEAD" >> "$GITHUB_OUTPUT"
+            echo "prev=${PREV_TAG:0:7} (initial commit)" >> "$GITHUB_OUTPUT"
+          else
+            echo "range=${PREV_TAG}..HEAD" >> "$GITHUB_OUTPUT"
+            echo "prev=${PREV_TAG}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          RANGE="${{ steps.vars.outputs.range }}"
+
+          # 提取不同类型的提交记录
+          FEATURES=$(git log "$RANGE" --pretty="- %s (%h)" | grep -E '^- feat(\(.+\))?!?:' || true)
+          FIXES=$(git log "$RANGE" --pretty="- %s (%h)" | grep -E '^- fix(\(.+\))?!?:' || true)
+          OTHERS=$(git log "$RANGE" --pretty="- %s (%h)" | grep -vE '^- (feat|fix)(\(.+\))?!?:' || true)
+
+          {
+            echo "body<<EOF"
+            echo "## What's Changed"
+            echo ""
+            echo "> Commits from \`${{ steps.vars.outputs.prev }}\` → \`${{ steps.vars.outputs.tag }}\`"
+            echo ""
+
+            if [ -n "$FEATURES" ]; then
+              echo "### ✨ Features"
+              echo "$FEATURES"
+              echo ""
+            fi
+
+            if [ -n "$FIXES" ]; then
+              echo "### 🐛 Bug Fixes"
+              echo "$FIXES"
+              echo ""
+            fi
+
+            if [ -n "$OTHERS" ]; then
+              echo "### 🔧 Other Changes"
+              echo "$OTHERS"
+              echo ""
+            fi
+
+            echo "**Full diff:** https://github.com/${{ github.repository }}/compare/${{ steps.vars.outputs.prev }}...${{ steps.vars.outputs.tag }}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Prepare APK file
+        run: |
+          VERSION="${{ steps.vars.outputs.tag }}"
+          # 将下载的 APK 重命名
+          for file in android-apk/*.apk; do
+            filename=$(basename -- "$file")
+            arch=$(echo $filename | sed 's/app-//' | sed 's/-release.apk//')
+            cp "$file" "bugaoshan_${VERSION}_${arch}.apk"
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: Release ${{ steps.vars.outputs.tag }}
+          body: ${{ steps.changelog.outputs.body }}
+          files: |
+            bugaoshan_*.apk
+          draft: false
+          prerelease: ${{ contains(steps.vars.outputs.tag, '-') }}
+          generate_release_notes: false
