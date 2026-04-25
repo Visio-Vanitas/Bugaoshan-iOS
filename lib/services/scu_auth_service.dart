@@ -501,8 +501,7 @@ class CookieClient extends http.BaseClient {
   ) async {
     try {
       return await _inner.send(request);
-    } on http.ClientException catch (e) {
-      final message = e.toString();
+    } on http.ClientException catch (_) {
       _inner.close();
       _inner = http.Client();
       final retryRequest = http.Request(request.method, request.url)
@@ -510,7 +509,7 @@ class CookieClient extends http.BaseClient {
         ..maxRedirects = request.maxRedirects
         ..persistentConnection = true
         ..headers.addAll(request.headers);
-      return _inner.send(retryRequest);
+      return await _inner.send(retryRequest);
     }
   }
 
