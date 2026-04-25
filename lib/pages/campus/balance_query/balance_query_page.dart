@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/balance_query_provider.dart';
+import 'package:bugaoshan/providers/scu_auth_provider.dart';
 import 'package:bugaoshan/services/balance_query_service.dart';
 
 class BalanceQueryPage extends StatefulWidget {
@@ -647,8 +648,6 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
   UnitItem? _selectedUnit;
   bool _hasUnits = true;
 
-  final _cusNoController = TextEditingController();
-  final _cusNameController = TextEditingController();
   final _roomNoController = TextEditingController();
 
   @override
@@ -752,11 +751,13 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
     if (_selectedCampus == null ||
         _selectedBuilding == null ||
         (_hasUnits && _selectedUnit == null) ||
-        _cusNoController.text.isEmpty ||
-        _cusNameController.text.isEmpty ||
         _roomNoController.text.isEmpty) {
       return;
     }
+
+    final auth = getIt<ScuAuthProvider>();
+    final cusNo = auth.userNumber ?? '';
+    final cusName = auth.userRealname ?? '';
 
     setState(() {
       _isLoading = true;
@@ -768,9 +769,9 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
 
     try {
       final success = await widget.provider.verifyRoom(
-        _cusNoController.text,
+        cusNo,
         1,
-        _cusNameController.text,
+        cusName,
         _selectedCampus!.code,
         _selectedBuilding!.code,
         unitCode,
@@ -779,8 +780,8 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
 
       if (success && mounted) {
         final binding = RoomBinding(
-          cusNo: _cusNoController.text,
-          cusName: _cusNameController.text,
+          cusNo: cusNo,
+          cusName: cusName,
           schoolCode: _selectedCampus!.code,
           schoolName: _selectedCampus!.name,
           regCode: _selectedBuilding!.code,
@@ -809,8 +810,6 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
 
   @override
   void dispose() {
-    _cusNoController.dispose();
-    _cusNameController.dispose();
     _roomNoController.dispose();
     super.dispose();
   }
@@ -1093,6 +1092,7 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
   }
 
   Widget _buildInfoInput(AppLocalizations l10n) {
+    final auth = getIt<ScuAuthProvider>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1101,26 +1101,18 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _cusNoController,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            labelText: l10n.studentId,
-            hintText: l10n.studentIdRequired,
-            border: const OutlineInputBorder(),
+        if (auth.userRealname != null && auth.userNumber != null)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [Text('${auth.userRealname} (${auth.userNumber})')],
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _cusNameController,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            labelText: l10n.cusName,
-            hintText: l10n.cusNameHint,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         TextField(
           controller: _roomNoController,
           onChanged: (_) => setState(() {}),
@@ -1151,8 +1143,6 @@ class _BindRoomDialogState extends State<_BindRoomDialog> {
     return _selectedCampus != null &&
         _selectedBuilding != null &&
         (_hasUnits ? _selectedUnit != null : true) &&
-        _cusNoController.text.isNotEmpty &&
-        _cusNameController.text.isNotEmpty &&
         _roomNoController.text.isNotEmpty;
   }
 }
