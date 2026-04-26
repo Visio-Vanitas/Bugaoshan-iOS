@@ -52,20 +52,41 @@ class _TestPageState extends State<TestPage> {
 
     try {
       final updateService = getIt<UpdateService>();
+      final currentVersion = _versionInfoProvider.currentVersion;
       if (isPreview) {
         final release = await updateService.getLatestPrereleaseFromGitHub();
-        info.setResult(
-          release.tagName,
-          release.downloadUrl,
-          release.isPrerelease,
-          release.body,
-        );
+        if (release.tagName != null && release.downloadUrl != null) {
+          info.setResult(
+            release.tagName,
+            release.downloadUrl,
+            release.isPrerelease,
+            release.body,
+          );
+        } else {
+          info.setChecking(false, null);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.noUpdateAvailable),
+              ),
+            );
+          }
+        }
       } else {
         final latest = await updateService.getLatestReleaseFromGitHub();
-        if (latest != null) {
+        if (latest != null &&
+            latest.tagName != null &&
+            updateService.hasUpdate(currentVersion, latest.tagName!)) {
           info.setResult(latest.tagName, latest.downloadUrl, null, latest.body);
         } else {
-          info.setChecking(false, 'No release found');
+          info.setChecking(false, null);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.noUpdateAvailable),
+              ),
+            );
+          }
         }
       }
     } catch (e) {
