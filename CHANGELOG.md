@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+## [0.7.0] - 2026-04-29
+
+### Added
+
 - 二课成绩单功能：支持查看和导出学时
 - 课程表非本周显示功能开关：支持开关显示非本周课程
 - 余额查询功能：支持查询电费和空调余额
