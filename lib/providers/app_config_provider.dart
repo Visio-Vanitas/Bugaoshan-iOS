@@ -41,6 +41,7 @@ class AppConfigProvider {
   final ValueNotifier<String?> backgroundImagePath = ValueNotifier<String?>(
     null,
   );
+  final ValueNotifier<int> backgroundImageVersion = ValueNotifier<int>(0);
 
   void _loadLocale() {
     final localeString = _sharedPreferences.getString(_keyLocale);
