@@ -9,8 +9,12 @@ def run(cmd: list[str]) -> str:
     return subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL).strip()
 
 def main():
-    # Use VERSION env var if provided (e.g. from workflow_dispatch), else get most recent tag
+    # Priority: explicit VERSION (workflow_dispatch) > GITHUB_REF_NAME (push tag) > latest tag
     tag = os.environ.get("VERSION", "")
+    if not tag:
+        ref_name = os.environ.get("GITHUB_REF_NAME", "")
+        if ref_name.startswith("v"):
+            tag = ref_name
     if not tag:
         tag = run(["git", "tag", "--sort=-version:refname"]).split("\n")[0]
 
