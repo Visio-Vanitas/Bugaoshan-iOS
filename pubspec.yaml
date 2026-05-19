@@ -61,6 +61,7 @@ flutter:
   assets:
     - assets/
     - assets/js/
+    - assets/scripts/
 flutter_launcher_icons:
   android: true
   ios: true
