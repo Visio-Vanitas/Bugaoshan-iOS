@@ -633,5 +633,8 @@
     "partyNoticeDesc": "查看四川大学党委学生工作部通知公告",
     "tuanweiNotice": "青春川大通知",
     "tuanweiNoticeDesc": "查看四川大学团委通知公告",
-    "downloadedAttachmentsDesc": "管理已下载的通知附件"
+    "downloadedAttachmentsDesc": "管理已下载的通知附件",
+    "jwcTabLabel": "教务处",
+    "xgbTabLabel": "党委学工部",
+    "tuanweiTabLabel": "青春川大"
 }

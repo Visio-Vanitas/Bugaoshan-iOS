@@ -1809,4 +1809,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get downloadedAttachmentsDesc =>
       'Manage downloaded notice attachments';
+
+  @override
+  String get jwcTabLabel => 'Academic';
+
+  @override
+  String get xgbTabLabel => 'Party Affairs';
+
+  @override
+  String get tuanweiTabLabel => 'Youth SCU';
 }

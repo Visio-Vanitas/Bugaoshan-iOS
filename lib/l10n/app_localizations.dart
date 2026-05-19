@@ -3486,6 +3486,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage downloaded notice attachments'**
   String get downloadedAttachmentsDesc;
+
+  /// No description provided for @jwcTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic'**
+  String get jwcTabLabel;
+
+  /// No description provided for @xgbTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Party Affairs'**
+  String get xgbTabLabel;
+
+  /// No description provided for @tuanweiTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Youth SCU'**
+  String get tuanweiTabLabel;
 }
 
 class _AppLocalizationsDelegate

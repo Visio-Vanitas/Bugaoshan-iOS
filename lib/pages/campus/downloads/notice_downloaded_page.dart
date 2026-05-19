@@ -39,13 +39,10 @@ class NoticeDownloadedPage extends StatefulWidget {
 
 class _NoticeDownloadedPageState extends State<NoticeDownloadedPage>
     with TickerProviderStateMixin {
-  final _dirConfigs = [
-    _DirConfig(kNoticeAttachmentDir, '教务处通知'),
-    _DirConfig(kPartyAttachmentDir, '党委学工部通知'),
-    _DirConfig(kTuanweiAttachmentDir, '青春川大通知'),
-  ];
+  late final List<_DirConfig> _dirConfigs;
 
   late final TabController _tabController;
+  bool _initialized = false;
 
   final Map<String, List<File>> _filesByDir = {};
   final Map<String, bool> _loadedByDir = {};
@@ -64,11 +61,24 @@ class _NoticeDownloadedPageState extends State<NoticeDownloadedPage>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: _dirConfigs.length,
+      length: 3,
       vsync: this,
-      initialIndex: widget.initialTab.clamp(0, _dirConfigs.length - 1),
+      initialIndex: widget.initialTab.clamp(0, 2),
     );
     _tabController.addListener(_onTabChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+    final l10n = AppLocalizations.of(context)!;
+    _dirConfigs = [
+      _DirConfig(kNoticeAttachmentDir, l10n.jwcTabLabel),
+      _DirConfig(kPartyAttachmentDir, l10n.xgbTabLabel),
+      _DirConfig(kTuanweiAttachmentDir, l10n.tuanweiTabLabel),
+    ];
     _loadFiles();
   }
 

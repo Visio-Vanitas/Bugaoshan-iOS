@@ -635,5 +635,8 @@
     "partyNoticeDesc": "SCU Party Affairs notices",
     "tuanweiNotice": "Youth SCU Notices",
     "tuanweiNoticeDesc": "SCU Youth League notices",
-    "downloadedAttachmentsDesc": "Manage downloaded notice attachments"
+    "downloadedAttachmentsDesc": "Manage downloaded notice attachments",
+    "jwcTabLabel": "Academic",
+    "xgbTabLabel": "Party Affairs",
+    "tuanweiTabLabel": "Youth SCU"
 }

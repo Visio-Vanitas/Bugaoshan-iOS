@@ -1758,6 +1758,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get downloadedAttachmentsDesc => '管理已下载的通知附件';
+
+  @override
+  String get jwcTabLabel => '教务处';
+
+  @override
+  String get xgbTabLabel => '党委学工部';
+
+  @override
+  String get tuanweiTabLabel => '青春川大';
 }
 
 /// The translations for Chinese, as used in China, using the Han script (`zh_Hans_CN`).
