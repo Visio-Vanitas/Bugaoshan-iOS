@@ -97,7 +97,7 @@ class AppConfigProvider {
         List<String>.from(defaultVisibleDockIds);
     acceptedEulaVersion.value =
         _sharedPreferences.getInt(_keyAcceptedEulaVersion) ??
-        (kDebugMode ? currentEulaVersion : 114514);
+        (kDebugMode ? 114514 : 0); //debug mode default 114514, skip eula check
     final themeColorIndex = _sharedPreferences.getInt(_keyThemeColorMode) ?? 0;
     themeColorMode.value = themeColorIndex < ThemeColorMode.values.length
         ? ThemeColorMode.values[themeColorIndex]
