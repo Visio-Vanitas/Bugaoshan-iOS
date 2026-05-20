@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/providers/app_config_provider.dart';
+import 'package:bugaoshan/services/download_manager.dart';
 import 'package:bugaoshan/widgets/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
@@ -269,9 +271,20 @@ class _NoticeDownloadedPageState extends State<NoticeDownloadedPage>
       ),
     );
     if (confirmed != true) return;
+    final manager = getIt<DownloadManager>();
     for (final path in _selected) {
       final file = File(path);
       if (file.existsSync()) await file.delete();
+      // Remove stale task from DownloadManager so the attachment sheet
+      // won't show a deleted file as "already downloaded".
+      final fileName = p.basename(path);
+      for (final cfg in _dirConfigs) {
+        if (path.contains('/${cfg.dirName}/') ||
+            path.contains('\\${cfg.dirName}\\')) {
+          manager.remove(cfg.dirName, fileName);
+          break;
+        }
+      }
     }
     for (final cfg in _dirConfigs) {
       final dir = await _attachmentsDir(cfg.dirName);

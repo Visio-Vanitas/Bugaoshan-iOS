@@ -23,7 +23,8 @@ void showAttachmentsSheet(
   void Function(String url)? onWebViewDownload,
 }) {
   final manager = getIt<DownloadManager>();
-  // Prime the manager: enqueue tasks for items that already exist on disk.
+  // Prime the manager: enqueue tasks for items that already exist on disk,
+  // and revoke stale tasks whose files have been deleted.
   for (final item in items) {
     checkDownloadedFile(dirName, item.name).then((path) {
       if (path != null) {
@@ -39,6 +40,11 @@ void showAttachmentsSheet(
             status: DownloadStatus.done,
             downloadedPath: path,
           );
+        }
+      } else {
+        final existing = manager.taskFor(dirName, item.name);
+        if (existing != null && existing.status == DownloadStatus.done) {
+          manager.remove(dirName, item.name);
         }
       }
     });
