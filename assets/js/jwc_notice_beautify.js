@@ -137,11 +137,7 @@
     }
 
     /* ── Detail page ── */
-    .ny-main {
-      max-width: 640px !important;
-      margin: 0 auto !important;
-      padding: 0 !important;
-    }
+    .ny-main { background-image: none !important; }
     .ny { padding: 0 !important; max-width: none !important; }
     .ny-right { padding: 0 !important; width: 100% !important; }
     .jxgl { padding: 0 !important; margin: 0 !important; }
