@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:crypto/crypto.dart' as crypto;
 
 import 'package:bugaoshan/models/release_info.dart';
 import 'package:flutter/services.dart';
@@ -237,7 +238,7 @@ class UpdateService {
 
     if (Platform.isAndroid) {
       onStatus?.call('Installing...');
-      await _installAndroid(chunks);
+      await _installAndroid(chunks, version);
       return;
     }
 
@@ -282,9 +283,14 @@ class UpdateService {
     exit(0);
   }
 
-  Future<void> _installAndroid(List<int> apkBytes) async {
+  Future<void> _installAndroid(List<int> apkBytes, String version) async {
     final tempDir = await getTemporaryDirectory();
-    final apkPath = p.join(tempDir.path, 'bugaoshan_update.apk');
+    // Compute short sha256 for uniqueness
+    final digest = crypto.sha256.convert(apkBytes);
+    final hashShort = digest.toString().substring(0, 8);
+    final safeVersion = version.replaceAll(RegExp(r'[^A-Za-z0-9_.-]'), '_');
+    final filename = 'Bugaoshan_v${safeVersion}_$hashShort.apk';
+    final apkPath = p.join(tempDir.path, filename);
     final apkFile = File(apkPath);
     await apkFile.writeAsBytes(apkBytes);
     await _channel.invokeMethod('installApk', {'path': apkPath});
