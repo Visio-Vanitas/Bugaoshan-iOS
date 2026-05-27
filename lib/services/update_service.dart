@@ -287,17 +287,17 @@ class UpdateService {
         ? TarDecoder().decodeBytes(GZipDecoder().decodeBytes(chunks))
         : ZipDecoder().decodeBytes(chunks);
     final extractDirObj = Directory(extractDir);
-    if (extractDirObj.existsSync()) {
-      extractDirObj.deleteSync(recursive: true);
+    if (await extractDirObj.exists()) {
+      await extractDirObj.delete(recursive: true);
     }
-    extractDirObj.createSync(recursive: true);
+    await extractDirObj.create(recursive: true);
+    final extractRoot = await extractDirObj.resolveSymbolicLinks();
     for (final file in archive) {
-      final sanitizedName = file.name.replaceAll('/', Platform.pathSeparator);
-      final filename = p.join(extractDir, sanitizedName);
+      final filename = _safeArchivePath(extractRoot, file.name);
       if (file.isFile) {
         final outFile = File(filename);
-        outFile.parent.createSync(recursive: true);
-        outFile.writeAsBytesSync(file.content as List<int>);
+        await outFile.parent.create(recursive: true);
+        await outFile.writeAsBytes(file.content as List<int>);
       }
     }
 
@@ -315,6 +315,25 @@ class UpdateService {
     }
 
     exit(0);
+  }
+
+  String _safeArchivePath(String extractRoot, String entryName) {
+    final normalizedName = entryName.replaceAll('\\', '/');
+    if (normalizedName.split('/').any((part) => part == '..')) {
+      throw FormatException('Unsafe archive entry: $entryName');
+    }
+    final relativePath = p.fromUri(Uri(path: normalizedName));
+    if (p.isAbsolute(relativePath)) {
+      throw FormatException('Unsafe archive entry: $entryName');
+    }
+    final fullPath = p.normalize(p.join(extractRoot, relativePath));
+    final rootWithSeparator = extractRoot.endsWith(Platform.pathSeparator)
+        ? extractRoot
+        : '$extractRoot${Platform.pathSeparator}';
+    if (fullPath != extractRoot && !fullPath.startsWith(rootWithSeparator)) {
+      throw FormatException('Unsafe archive entry: $entryName');
+    }
+    return fullPath;
   }
 
   Future<void> _installAndroid(List<int> apkBytes, String version) async {
