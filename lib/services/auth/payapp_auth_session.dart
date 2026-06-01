@@ -52,8 +52,14 @@ class PayAppAuthSession extends AuthSession<http.Client> {
       state = AuthState.ready;
     }
 
-    // 缓存 client，后续调用复用同一实例
-    _cachedClient ??= client;
+    // 缓存 client，后续调用复用同一实例。
+    // 用 identical 判断而非 ??=：当 SCU 侧 invalidateCachedClient() 后
+    // bindSession() 会返回新的 CookieClient 实例（cookie 已重置），此时必须
+    // 同步替换 payapp 的缓存，否则业务方会拿到旧 client + 旧 cookie，导致
+    // 鉴权失败或请求落到旧 session。跟上方 _warrantedClient 的判断方式保持一致。
+    if (!identical(client, _cachedClient)) {
+      _cachedClient = client;
+    }
     return _cachedClient!;
   }
 
