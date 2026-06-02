@@ -44,12 +44,13 @@ class ScuAuthProvider extends ChangeNotifier {
   }
 
   String? get accessToken => _authManager.scu.accessToken;
+  ScuAuthService get authService => _authManager.scu.authService;
   String? get userRealname => _userRealname;
   String? get userNumber => _userNumber;
   bool get isAutoLoggingIn => _isAutoLoggingIn;
   bool get isLoggedIn => _authManager.isScuLoggedIn;
   bool get isExpired => _authManager.scu.isExpired;
-  ScuApiService get service => _authManager.scu.service;
+  ScuApiService get service => _authManager.apiService;
 
   Future<void> login({
     required String username,
@@ -148,7 +149,7 @@ class ScuAuthProvider extends ChangeNotifier {
       const maxRetries = 5;
       for (int attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          final captcha = await _authManager.scu.service.fetchCaptcha();
+          final captcha = await _authManager.scu.authService.fetchCaptcha();
 
           String captchaText;
           try {

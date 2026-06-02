@@ -10,7 +10,7 @@ extension ScuApiSchedule on ScuApiService {
         headers: {
           'Accept': 'text/html,*/*',
           'Referer': '$kZhjwBase/',
-          'User-Agent': ScuApiService._headers['User-Agent']!,
+          'User-Agent': ScuAuthService.requestHeaders['User-Agent']!,
         },
       );
       final body = resp.body.trim();
@@ -34,7 +34,7 @@ extension ScuApiSchedule on ScuApiService {
         headers: {
           'Accept': 'text/html,*/*',
           'Referer': '$kZhjwBase/',
-          'User-Agent': ScuApiService._headers['User-Agent']!,
+          'User-Agent': ScuAuthService.requestHeaders['User-Agent']!,
         },
       );
       final body = resp.body.trim();
@@ -71,7 +71,7 @@ extension ScuApiSchedule on ScuApiService {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
           'Referer':
               '$kZhjwBase/student/courseSelect/calendarSemesterCurriculum/index',
-          'User-Agent': ScuApiService._headers['User-Agent']!,
+          'User-Agent': ScuAuthService.requestHeaders['User-Agent']!,
           'X-Requested-With': 'XMLHttpRequest',
         },
         body: 'planCode=$planCode',

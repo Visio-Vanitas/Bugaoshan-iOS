@@ -13,7 +13,7 @@ extension ScuApiGrades on ScuApiService {
           'Accept':
               'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Referer': '$kZhjwBase/',
-          'User-Agent': ScuApiService._headers['User-Agent']!,
+          'User-Agent': ScuAuthService.requestHeaders['User-Agent']!,
         },
       );
       final indexBody = indexResp.body;
@@ -35,7 +35,7 @@ extension ScuApiGrades on ScuApiService {
           'Accept': 'application/json, text/plain, */*',
           'Referer':
               '$kZhjwBase/student/integratedQuery/scoreQuery/allPassingScores/index',
-          'User-Agent': ScuApiService._headers['User-Agent']!,
+          'User-Agent': ScuAuthService.requestHeaders['User-Agent']!,
         },
       );
       final body = callbackResp.body.trim();
@@ -59,7 +59,7 @@ extension ScuApiGrades on ScuApiService {
           'Accept':
               'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Referer': '$kZhjwBase/',
-          'User-Agent': ScuApiService._headers['User-Agent']!,
+          'User-Agent': ScuAuthService.requestHeaders['User-Agent']!,
         },
       );
 
@@ -82,7 +82,7 @@ extension ScuApiGrades on ScuApiService {
           'Accept': 'application/json, text/plain, */*',
           'Referer':
               '$kZhjwBase/student/integratedQuery/scoreQuery/schemeScores/index',
-          'User-Agent': ScuApiService._headers['User-Agent']!,
+          'User-Agent': ScuAuthService.requestHeaders['User-Agent']!,
         },
       );
 

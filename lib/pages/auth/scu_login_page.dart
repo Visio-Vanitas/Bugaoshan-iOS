@@ -68,7 +68,7 @@ class _ScuLoginPageState extends State<ScuLoginPage> {
   Future<void> _loadCaptcha() async {
     setState(() => _captchaLoading = true);
     try {
-      final captcha = await getIt<ScuAuthProvider>().service.fetchCaptcha();
+      final captcha = await getIt<ScuAuthProvider>().authService.fetchCaptcha();
       String? recognizedText;
       try {
         final comma = captcha.captchaBase64.indexOf(',');
