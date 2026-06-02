@@ -2,9 +2,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/scu_auth_service.dart';
-import 'package:bugaoshan/services/scu_microservice_auth_service.dart';
-import 'package:bugaoshan/utils/session_expiry_handler.dart';
 
 class ProfileLabelsProvider extends ChangeNotifier {
   List<Map<String, dynamic>>? _labels;
@@ -45,15 +42,9 @@ class ProfileLabelsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final authService = ScuMicroserviceAuthService();
-      final client = await authService.getAuthenticatedClient();
-      if (client == null) {
-        _loading = false;
-        notifyListeners();
-        return;
-      }
-
-      try {
+      final json = await getIt<ScuAuthProvider>().service.request((
+        client,
+      ) async {
         final resp = await client.get(
           Uri.parse('https://wfw.scu.edu.cn/mashupapp/wap/real/user'),
           headers: {
@@ -62,24 +53,17 @@ class ProfileLabelsProvider extends ChangeNotifier {
             'Referer': 'https://wfw.scu.edu.cn',
           },
         );
+        return jsonDecode(resp.body) as Map<String, dynamic>;
+      });
 
-        final json = jsonDecode(resp.body) as Map<String, dynamic>;
-        if (json['e'] == 0 && json['d']?['labels'] != null) {
-          _labels = (json['d']['labels'] as List)
-              .map((e) => e as Map<String, dynamic>)
-              .toList();
-          _error = false;
-        } else {
-          _error = true;
-        }
-      } finally {
-        client.close();
+      if (json['e'] == 0 && json['d']?['labels'] != null) {
+        _labels = (json['d']['labels'] as List)
+            .map((e) => e as Map<String, dynamic>)
+            .toList();
+        _error = false;
+      } else {
+        _error = true;
       }
-    } on ScuLoginException catch (e) {
-      if (e.sessionExpired) {
-        await SessionExpiryHandler.handle(getIt<ScuAuthProvider>());
-      }
-      _error = true;
     } catch (e) {
       _error = true;
     }

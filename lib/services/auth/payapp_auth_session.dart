@@ -17,9 +17,6 @@ class PayAppAuthSession extends AuthSession<http.Client> {
   /// 通过对比指针/身份来判断是否需要重新执行 warrant。
   http.Client? _warrantedClient;
 
-  /// 本会话缓存的 client，供重复使用，避免每次调用都创建新连接。
-  http.Client? _cachedClient;
-
   PayAppAuthSession(this._scuSession);
 
   @override
@@ -52,21 +49,12 @@ class PayAppAuthSession extends AuthSession<http.Client> {
       state = AuthState.ready;
     }
 
-    // 缓存 client，后续调用复用同一实例。
-    // 用 identical 判断而非 ??=：当 SCU 侧 invalidateCachedClient() 后
-    // bindSession() 会返回新的 CookieClient 实例（cookie 已重置），此时必须
-    // 同步替换 payapp 的缓存，否则业务方会拿到旧 client + 旧 cookie，导致
-    // 鉴权失败或请求落到旧 session。跟上方 _warrantedClient 的判断方式保持一致。
-    if (!identical(client, _cachedClient)) {
-      _cachedClient = client;
-    }
-    return _cachedClient!;
+    return client;
   }
 
   @override
   Future<bool> refresh() async {
     _warrantedClient = null;
-    _cachedClient = null;
     final refreshed = await _scuSession.refresh();
     if (refreshed) {
       state = AuthState.ready;
@@ -79,8 +67,6 @@ class PayAppAuthSession extends AuthSession<http.Client> {
   @override
   Future<void> logout() async {
     _warrantedClient = null;
-    _cachedClient?.close();
-    _cachedClient = null;
     state = AuthState.unknown;
   }
 }

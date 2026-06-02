@@ -23,12 +23,13 @@ const _sessionDurationSeconds = 3600;
 class ScuAuthSession extends AuthSession<CookieClient> {
   final SharedPreferences _prefs;
 
-  final ScuAuthService _service = ScuAuthService();
+  final ScuAuthService _service;
 
   String? _accessToken;
   int? _loginTimestamp;
 
-  ScuAuthSession(this._prefs);
+  ScuAuthSession(this._prefs, {ScuAuthService? service})
+    : _service = service ?? ScuAuthService();
 
   /// 从安全存储恢复 token（应用启动时调用）。
   Future<void> init() async {
@@ -144,21 +145,25 @@ class ScuAuthSession extends AuthSession<CookieClient> {
     state = AuthState.unknown;
   }
 
+  static const _keyRememberPassword = 'scu_remember_password';
+  static const _keySavedUsername = 'scu_saved_username';
+  static const _keySavedPassword = 'scu_saved_password';
+
   /// 保存凭据（用于自动登录）。
   Future<void> saveCredentials(String username, String password) async {
     final storage = SecureStorageProvider.instance;
-    await storage.write(key: 'scu_remember_password', value: 'true');
-    await storage.write(key: 'scu_saved_username', value: username);
-    await storage.write(key: 'scu_saved_password', value: password);
+    await storage.write(key: _keyRememberPassword, value: 'true');
+    await storage.write(key: _keySavedUsername, value: username);
+    await storage.write(key: _keySavedPassword, value: password);
   }
 
   /// 获取保存的凭据。
   Future<Map<String, String>?> getSavedCredentials() async {
     final storage = SecureStorageProvider.instance;
-    final remember = await storage.read(key: 'scu_remember_password');
+    final remember = await storage.read(key: _keyRememberPassword);
     if (remember != 'true') return null;
-    final username = await storage.read(key: 'scu_saved_username');
-    final password = await storage.read(key: 'scu_saved_password');
+    final username = await storage.read(key: _keySavedUsername);
+    final password = await storage.read(key: _keySavedPassword);
     if (username != null && password != null) {
       return {'username': username, 'password': password};
     }
@@ -168,9 +173,9 @@ class ScuAuthSession extends AuthSession<CookieClient> {
   /// 清除保存的凭据。
   Future<void> clearCredentials() async {
     final storage = SecureStorageProvider.instance;
-    await storage.delete(key: 'scu_remember_password');
-    await storage.delete(key: 'scu_saved_username');
-    await storage.delete(key: 'scu_saved_password');
+    await storage.delete(key: _keyRememberPassword);
+    await storage.delete(key: _keySavedUsername);
+    await storage.delete(key: _keySavedPassword);
   }
 
   /// 自动登录（从安全存储恢复凭据 + OCR 验证码）。

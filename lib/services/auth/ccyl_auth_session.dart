@@ -89,8 +89,9 @@ class CcylAuthSession extends AuthSession<http.Client> {
   Future<void> _saveToSecure() async {
     final secure = SecureStorageProvider.instance;
     await secure.write(key: _keyCcylToken, value: _token!);
-    if (_service.currentUser != null) {
-      await secure.write(key: _keyCcylUserId, value: _service.currentUser!.id);
+    final user = _service.currentUser;
+    if (user != null) {
+      await secure.write(key: _keyCcylUserId, value: user.id);
     }
   }
 

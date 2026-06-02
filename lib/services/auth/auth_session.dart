@@ -64,6 +64,7 @@ abstract class AuthSession<T extends http.Client> extends ChangeNotifier {
       _refreshCompleter!.complete(result);
       return result;
     } catch (e) {
+      state = AuthState.error;
       _refreshCompleter!.completeError(e);
       rethrow;
     } finally {
@@ -85,46 +86,41 @@ abstract class AuthSession<T extends http.Client> extends ChangeNotifier {
     Future<R> Function(T client) fn, {
     Future<R> Function(T client)? retryFn,
   }) async {
-    // getClient 放在 try 块内，确保其抛出的 ScuLoginException 也能被捕获和重试
     late T client;
     try {
       client = await getClient();
     } on ScuLoginException catch (e) {
       if (!e.sessionExpired) rethrow;
-
-      state = AuthState.expired;
-      final refreshed = await _synchronizedRefresh();
-      if (!refreshed) {
-        state = AuthState.error;
-        onSessionExpired?.call();
-        rethrow;
-      }
-
-      state = AuthState.ready;
-      client = await getClient();
-      final retry = retryFn ?? fn;
-      return await retry(client);
+      return _performRequestWithRetry(fn, retryFn, e);
     }
 
     try {
       return await fn(client);
     } on ScuLoginException catch (e) {
       if (!e.sessionExpired) rethrow;
-
-      state = AuthState.expired;
-      final refreshed = await _synchronizedRefresh();
-
-      if (!refreshed) {
-        state = AuthState.error;
-        onSessionExpired?.call();
-        rethrow;
-      }
-
-      // 刷新成功，用新 client 重试
-      state = AuthState.ready;
-      final newClient = await getClient();
-      final retry = retryFn ?? fn;
-      return await retry(newClient);
+      return _performRequestWithRetry(fn, retryFn, e);
     }
+  }
+
+  /// 执行一次完整的 session 过期刷新 + 重试流程。
+  /// 提取自 [request] 以消除两段重复逻辑。
+  Future<R> _performRequestWithRetry<R>(
+    Future<R> Function(T client) fn,
+    Future<R> Function(T client)? retryFn,
+    ScuLoginException originalException,
+  ) async {
+    state = AuthState.expired;
+    final refreshed = await _synchronizedRefresh();
+    if (!refreshed) {
+      state = AuthState.error;
+      onSessionExpired?.call();
+      throw originalException;
+    }
+
+    // 刷新成功，用新 client 重试
+    state = AuthState.ready;
+    final newClient = await getClient();
+    final retry = retryFn ?? fn;
+    return await retry(newClient);
   }
 }

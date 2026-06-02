@@ -34,6 +34,7 @@ class AuthManager {
 
   AuthManager(SharedPreferences prefs) {
     scu = ScuAuthSession(prefs);
+    scu.service.bindAuthManager(this);
     payApp = PayAppAuthSession(scu);
     fitness = FitnessAuthSession(scu);
     ccyl = CcylAuthSession();

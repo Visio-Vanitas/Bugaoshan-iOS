@@ -71,7 +71,6 @@ class _MyAppState extends State<MyApp> {
       ]),
       builder: (context, _) => MaterialApp(
         navigatorKey: navigatorKey,
-        builder: (context, child) => MouseBackHandler(child: child!),
         locale: _appConfig.locale.value,
         onGenerateTitle: (ctx) => AppLocalizations.of(ctx)!.bugaoshan,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -79,8 +78,9 @@ class _MyAppState extends State<MyApp> {
         theme: _buildTheme(Brightness.light),
         darkTheme: _buildTheme(Brightness.dark),
         themeMode: ThemeMode.system,
-        builder: (context, child) =>
-            SessionExpiredListener(child: child ?? const SizedBox()),
+        builder: (context, child) => MouseBackHandler(
+          child: SessionExpiredListener(child: child ?? const SizedBox()),
+        ),
         home: ValueListenableBuilder<int>(
           valueListenable: _appConfig.acceptedEulaVersion,
           builder: (_, eulaVersion, _) {
