@@ -26,6 +26,12 @@ graph TD
         S4["通用 request() 供非标准调用方使用"]
     end
 
+    subgraph Auth["ScuAuthService"]
+        A1["login / fetchCaptcha / bindSession / logout"]
+        A2["_accessToken / _cachedClient / _bindSessionFuture"]
+        A3["SM2 加密 + SSO 预热 (JWT + CAS Apereo)"]
+    end
+
     subgraph Session["AuthSession<T> 框架"]
         R1["request(fn): getClient → fn(client) → 过期重试"]
         R2["_synchronizedRefresh(): Completer 互斥，N 并发 = 1 次刷新"]
@@ -59,6 +65,7 @@ graph TD
     Session --> Manager
     Manager --> Sessions
     Session -- "刷新失败" --> UI
+    Session -->|"login/bindSession"| Auth
 
     SCU -. "依赖" .-> PAY
     SCU -. "依赖" .-> FIT
@@ -69,9 +76,10 @@ graph TD
 | 层 | 关心什么 | 不关心什么 |
 |---|---|---|
 | **Provider / Page** | UI 状态流转（loading → loaded → error）、数据缓存、用户交互 | HTTP 细节、cookie 管理、token 过期、重试逻辑 |
-| **ScuApiService** | HTTP 请求构造、HTML/JSON 解析、过期信号检测（302/空body/登录页） | 登录态生命周期、UI 状态、缓存策略 |
+| **ScuApiService** | HTTP 数据请求 + HTML/JSON 解析、过期信号检测（302/空body/登录页） | 登录态管理、UI 状态、缓存策略 |
+| **ScuAuthService** | 认证：login / fetchCaptcha / bindSession / logout，SM2 加密、SSO 预热 | HTTP 业务请求、UI 状态、数据解析 |
 | **AuthSession 框架** | token 过期判断、自动刷新、并发互斥、重试一次、触发过期回调 | 具体 HTTP 怎么发、数据怎么解析、UI 怎么显示 |
-| **AuthManager** | 4 个 Session 的生命周期、并行初始化/刷新、全局回调注册 | 具体 token 格式、HTTP 细节、UI 状态 |
+| **AuthManager** | 4 个 Session 的生命周期 + ScuApiService、并行初始化/刷新、全局回调注册 | 具体 token 格式、HTTP 细节、UI 状态 |
 | **具体 Session** | 自己的认证方式（token/OAuth/SSO）、过期判断、refresh 策略 | 其他 Session 的存在、UI 状态、业务数据格式 |
 | **SessionExpiredListener** | 全局 Snackbar 展示、防抖、导航到登录页 | 具体哪个 Session 过期、数据怎么恢复 |
 
@@ -199,19 +207,27 @@ final data = await service.fetchSchemeScores();
 
 ### 3. 为什么用 `extension` + `part` 拆分 Service
 
-`ScuApiService` 包含认证核心（login/bindSession/logout）+ 三个业务域的 fetch 方法（课表/成绩/教室），总计 721 行。
+`ScuApiService`（数据层）只有 `bindAuthManager` + `request` + `_checkSessionExpiry` + 三个业务域的 fetch 方法。
 
 用 `extension on ScuApiService` + `part of` 拆分：
 - `part` 文件共享库作用域，可以访问 `_authManager`、`_checkSessionExpiry()` 等私有成员
 - 每个业务域独立一个文件，便于定位和维护
-- 主文件只保留认证核心逻辑
-- 唯一限制：`static _headers` 需要写成 `ScuApiService._headers`
+- 静态配置（`requestHeaders`）放在 `ScuAuthService` 中，通过公开 getter 暴露给 extension
 
-### 4. 为什么用 `bindAuthManager()` 而非构造函数注入
+### 4. 为什么 Auth 和 API 拆成两个 Service
 
-`AuthManager` 持有 `ScuAuthSession`，`ScuAuthSession` 内部创建 `ScuApiService`。如果 `ScuApiService` 构造函数需要 `AuthManager`，就循环依赖了。
+`ScuApiService` 原本同时承担认证（login/bindSession）和数据请求（fetchXxx）两种完全不同的职责——认证是"一次性的开关"，数据请求是"每次业务都要用"。混在一起导致：
+- 类名误导（先后叫 `ScuAuthService` 和 `ScuApiService` 都不准确）
+- 出现循环依赖的 `bindAuthManager(this)` 延迟绑定 hack
+- `ScuApiService` 无法独立单测（必须 mock AuthManager）
 
-解法：延迟绑定。
+拆分后：
+- `ScuAuthService` —— 仅认证，无任何依赖，可独立单测
+- `ScuApiService` —— 仅数据，依赖 AuthManager 用于 `request()` 转发
+- 单向依赖链：`ScuApiService → AuthManager → ScuAuthSession → ScuAuthService`
+
+`ScuApiService` 仍保留 `bindAuthManager(this)` 是因为它需要转发到 `_authManager.scu.request()`。这是 `request()` 模式的固有限制（数据层不知道如何拿已认证 client，必须由框架注入）。`ScuAuthService` 彻底摆脱了这个 hack。
+
 ```dart
 // ScuApiService
 late AuthManager _authManager;
@@ -298,19 +314,22 @@ graph LR
     subgraph auth["lib/services/auth/"]
         A1["auth_session.dart<br/>抽象基类"]
         A2["auth_state.dart<br/>AuthState 枚举"]
-        A3["auth_manager.dart<br/>持有 4 个 Session"]
+        A3["auth_manager.dart<br/>4 个 Session + ScuApiService"]
         A4["scu_auth_session.dart<br/>SCU 主认证"]
         A5["payapp_auth_session.dart<br/>电费"]
         A6["fitness_auth_session.dart<br/>体测"]
         A7["ccyl_auth_session.dart<br/>二课"]
     end
 
+    subgraph scu_auth["lib/services/scu_auth/"]
+        SA1["scu_auth_service.dart<br/>认证: login / fetchCaptcha / bindSession / logout<br/>+ ScuLoginException / CaptchaResult"]
+    end
+
     subgraph scu_api["lib/services/scu_api/"]
-        S1["scu_api_service.dart<br/>主类: login + bindSession"]
+        S1["scu_api_service.dart<br/>主类: request() + bindAuthManager()"]
         S2["scu_api_schedule.dart<br/>extension: 课表/学期"]
         S3["scu_api_grades.dart<br/>extension: 成绩"]
         S4["scu_api_classroom.dart<br/>extension: 教室"]
-        S5["scu_api_models.dart<br/>CaptchaResult + Exception"]
         S6["cookie_client.dart<br/>按域隔离 cookie"]
     end
 
