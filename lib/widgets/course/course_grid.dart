@@ -3,7 +3,9 @@ import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/models/course.dart';
 import 'package:bugaoshan/providers/app_config_provider.dart';
+import 'package:bugaoshan/utils/holiday_utils.dart';
 import 'package:bugaoshan/widgets/course/course_card.dart';
+import 'package:bugaoshan/widgets/course/special_day_sheet.dart';
 
 List<Course> selectVisibleCoursesForDay(
   List<Course> courses,
@@ -66,6 +68,7 @@ class CourseGrid extends StatefulWidget {
   final void Function(Course course)? onCourseTap;
   final void Function(Course course)? onCourseLongPress;
   final void Function(int dayOfWeek, int section)? onEmptyTap;
+  final void Function(DateTime date, SpecialDayInfo info)? onSpecialDayTap;
 
   const CourseGrid({
     super.key,
@@ -76,6 +79,7 @@ class CourseGrid extends StatefulWidget {
     this.onCourseTap,
     this.onCourseLongPress,
     this.onEmptyTap,
+    this.onSpecialDayTap,
   });
 
   @override
@@ -226,49 +230,82 @@ class _CourseGridState extends State<CourseGrid> {
                   ),
                 );
                 final isToday = date.isAtSameMomentAs(today);
+                final specialDay = HolidayUtils.getSpecialDay(date);
+                final hasSpecialDay =
+                    specialDay.type != SpecialDayType.ordinary;
+
+                Color? labelColor;
+                String? label;
+                if (specialDay.type == SpecialDayType.holiday) {
+                  labelColor = Colors.red;
+                  label = '假';
+                } else if (specialDay.type == SpecialDayType.festival) {
+                  labelColor = Colors.orange;
+                  label = '节';
+                } else if (specialDay.type == SpecialDayType.solarTerm) {
+                  labelColor = Colors.green;
+                  label = '气';
+                }
 
                 return Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isToday
-                          ? theme.colorScheme.primaryContainer.withAlpha(180)
-                          : null,
-                      border: Border(
-                        right: BorderSide(
-                          color: theme.colorScheme.outlineVariant,
-                          width: 0.5,
+                  child: GestureDetector(
+                    onTap: hasSpecialDay && widget.onSpecialDayTap != null
+                        ? () => widget.onSpecialDayTap!(date, specialDay)
+                        : null,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isToday
+                            ? theme.colorScheme.primaryContainer.withAlpha(180)
+                            : null,
+                        border: Border(
+                          right: BorderSide(
+                            color: theme.colorScheme.outlineVariant,
+                            width: 0.5,
+                          ),
                         ),
                       ),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isToday
-                                  ? FontWeight.bold
-                                  : FontWeight.w600,
-                              color: isToday
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurface,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isToday
+                                    ? FontWeight.bold
+                                    : FontWeight.w600,
+                                color: isToday
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${date.month}-${date.day}',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isToday
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: isToday
-                                  ? theme.colorScheme.primary.withAlpha(200)
-                                  : theme.colorScheme.onSurfaceVariant,
+                            Text(
+                              '${date.month}-${date.day}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: isToday
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: isToday
+                                    ? theme.colorScheme.primary.withAlpha(200)
+                                    : theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                          ),
-                        ],
+                            if (label != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 1),
+                                child: Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: labelColor,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

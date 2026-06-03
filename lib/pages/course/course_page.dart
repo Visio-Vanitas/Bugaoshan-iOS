@@ -14,6 +14,8 @@ import 'package:bugaoshan/widgets/course/course_grid.dart';
 import 'package:bugaoshan/widgets/dialog/dialog.dart';
 import 'package:bugaoshan/widgets/route/router_utils.dart';
 import 'package:bugaoshan/utils/export_schedule_utils.dart';
+import 'package:bugaoshan/utils/holiday_utils.dart';
+import 'package:bugaoshan/widgets/course/special_day_sheet.dart';
 
 part 'course_page_swipe_page_view.dart';
 part 'course_page_top_bar.dart';
@@ -190,6 +192,7 @@ class _CoursePageState extends State<CoursePage> with WidgetsBindingObserver {
           onCourseTap: _onCourseTap,
           onCourseLongPress: _onCourseLongPress,
           onEmptyTap: _onEmptyTap,
+          onSpecialDayTap: _onSpecialDayTap,
         );
       },
     );

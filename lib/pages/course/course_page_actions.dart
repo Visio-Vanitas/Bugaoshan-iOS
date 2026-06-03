@@ -120,4 +120,8 @@ extension _CoursePageActions on _CoursePageState {
       CourseEditPage(prefillDayOfWeek: dayOfWeek, prefillSection: section),
     );
   }
+
+  void _onSpecialDayTap(DateTime date, SpecialDayInfo info) {
+    showSpecialDaySheet(context, date, info);
+  }
 }
