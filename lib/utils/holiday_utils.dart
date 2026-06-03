@@ -46,28 +46,59 @@ class HolidayUtils {
   }
 
   /// 获取 [holidayName] 在 [year] 的总放假天数
-  static int getHolidayTotalDays(String holidayName, int year) {
+  ///
+  /// 若提供 [near] 日期，则仅在该日期前后 30 天内搜索，避免遍历全年。
+  static int getHolidayTotalDays(
+    String holidayName,
+    int year, {
+    DateTime? near,
+  }) {
     return _totalDaysCache
         .putIfAbsent(year, () => {})
         .putIfAbsent(
           holidayName,
-          () => _computeHolidayTotalDays(holidayName, year),
+          () => _computeHolidayTotalDays(holidayName, year, near: near),
         );
   }
 
-  static int _computeHolidayTotalDays(String holidayName, int year) {
+  static int _computeHolidayTotalDays(
+    String holidayName,
+    int year, {
+    DateTime? near,
+  }) {
     int count = 0;
-    for (var month = 1; month <= 12; month++) {
-      final daysInMonth = DateTime(year, month + 1, 0).day;
-      for (var day = 1; day <= daysInMonth; day++) {
+    if (near != null) {
+      // 在 near 前后 30 天内搜索（覆盖最长假期）
+      final start = near.subtract(const Duration(days: 30));
+      final end = near.add(const Duration(days: 30));
+      for (var d = start; !d.isAfter(end); d = d.add(const Duration(days: 1))) {
+        if (d.year != year) continue;
         try {
-          final legalHoliday = SolarDay(year, month, day).getLegalHoliday();
+          final legalHoliday = SolarDay(
+            d.year,
+            d.month,
+            d.day,
+          ).getLegalHoliday();
           if (legalHoliday != null &&
               !legalHoliday.isWork() &&
               legalHoliday.getName() == holidayName) {
             count++;
           }
         } catch (_) {}
+      }
+    } else {
+      for (var month = 1; month <= 12; month++) {
+        final daysInMonth = DateTime(year, month + 1, 0).day;
+        for (var day = 1; day <= daysInMonth; day++) {
+          try {
+            final legalHoliday = SolarDay(year, month, day).getLegalHoliday();
+            if (legalHoliday != null &&
+                !legalHoliday.isWork() &&
+                legalHoliday.getName() == holidayName) {
+              count++;
+            }
+          } catch (_) {}
+        }
       }
     }
     return count;
@@ -122,6 +153,7 @@ class HolidayUtils {
         final totalDays = getHolidayTotalDays(
           legalHoliday.getName(),
           date.year,
+          near: date,
         );
         return SpecialDayInfo(
           type: SpecialDayType.holiday,
