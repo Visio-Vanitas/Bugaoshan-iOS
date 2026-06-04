@@ -124,6 +124,11 @@
     "updateToLatest": "Update to Latest",
     "updateToStable": "Update to Latest Stable",
     "updateToPreview": "Update to Latest (Include Preview)",
+    "usePreviewUpdateSource": "Use Preview Release Source",
+    "@usePreviewUpdateSource": {
+      "description": "Toggle in the test page that makes the home/about update checks target the preview release channel."
+    },
+    "usePreviewUpdateSourceHint": "Affects only the automatic checks on the home and about pages. The test page always checks both channels.",
     "downloading": "Downloading",
     "updateFailed": "Update failed",
     "preReleaseWarning": "This is a pre-release version. Use with caution.",

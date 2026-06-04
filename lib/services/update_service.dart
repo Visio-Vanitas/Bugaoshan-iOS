@@ -216,6 +216,22 @@ class UpdateService {
     }
   }
 
+  /// Unified update check used by production callers (home / about pages).
+  ///
+  /// When [includePreview] is true, the latest prerelease is checked; otherwise
+  /// the latest stable release. Pass [gitTag] only when [includePreview] is true
+  /// (used to suppress the "current build is itself the latest preview" case).
+  Future<UpdateCheckResult> checkForUpdate({
+    required bool includePreview,
+    required String currentVersion,
+    String? gitTag,
+  }) {
+    if (includePreview) {
+      return checkPreviewUpdate(currentVersion, gitTag ?? '');
+    }
+    return checkStableUpdate(currentVersion);
+  }
+
   List<int>? _parseVersion(String version) {
     final cleanVersion = version
         .split('+')

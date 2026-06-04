@@ -71,8 +71,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       final updateService = getIt<UpdateService>();
       final appInfo = getIt<AppInfoProvider>();
       final appConfig = getIt<AppConfigProvider>();
-      final result = await updateService.checkStableUpdate(
-        appInfo.currentVersion,
+      final includePreview = appConfig.usePreviewUpdateSource.value;
+      final result = await updateService.checkForUpdate(
+        includePreview: includePreview,
+        currentVersion: appInfo.currentVersion,
+        gitTag: includePreview ? appInfo.gitTag : null,
       );
       if (result.hasUpdate) {
         appConfig.hasUpdateNotification.value = true;

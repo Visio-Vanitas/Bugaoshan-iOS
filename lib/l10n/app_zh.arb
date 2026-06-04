@@ -124,6 +124,8 @@
     "updateToLatest": "升级到最新版本",
     "updateToStable": "更新到最新稳定版",
     "updateToPreview": "更新到最新版（包括预览版）",
+    "usePreviewUpdateSource": "软件更新使用预览版源",
+    "usePreviewUpdateSourceHint": "仅影响首页和关于页面的自动检查；测试页面始终同时检查两个渠道。",
     "downloading": "正在下载",
     "updateFailed": "更新失败",
     "preReleaseWarning": "这是预发布版本，使用时请注意。",

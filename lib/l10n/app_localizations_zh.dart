@@ -321,6 +321,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get updateToPreview => '更新到最新版（包括预览版）';
 
   @override
+  String get usePreviewUpdateSource => '软件更新使用预览版源';
+
+  @override
+  String get usePreviewUpdateSourceHint => '仅影响首页和关于页面的自动检查；测试页面始终同时检查两个渠道。';
+
+  @override
   String get downloading => '正在下载';
 
   @override

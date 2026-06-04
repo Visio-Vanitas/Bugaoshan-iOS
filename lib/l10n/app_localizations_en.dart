@@ -331,6 +331,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateToPreview => 'Update to Latest (Include Preview)';
 
   @override
+  String get usePreviewUpdateSource => 'Use Preview Release Source';
+
+  @override
+  String get usePreviewUpdateSourceHint =>
+      'Affects only the automatic checks on the home and about pages. The test page always checks both channels.';
+
+  @override
   String get downloading => 'Downloading';
 
   @override

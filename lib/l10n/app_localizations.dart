@@ -703,6 +703,18 @@ abstract class AppLocalizations {
   /// **'Update to Latest (Include Preview)'**
   String get updateToPreview;
 
+  /// Toggle in the test page that makes the home/about update checks target the preview release channel.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Preview Release Source'**
+  String get usePreviewUpdateSource;
+
+  /// No description provided for @usePreviewUpdateSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Affects only the automatic checks on the home and about pages. The test page always checks both channels.'**
+  String get usePreviewUpdateSourceHint;
+
   /// No description provided for @downloading.
   ///
   /// In en, this message translates to:

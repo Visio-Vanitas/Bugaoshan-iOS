@@ -10,6 +10,7 @@ import 'package:bugaoshan/pages/test/update_card.dart';
 import 'package:bugaoshan/pages/test/update_progress_state.dart';
 import 'package:bugaoshan/pages/test/update_result_notifier.dart';
 import 'package:bugaoshan/pages/test/wizard_reset_button.dart';
+import 'package:bugaoshan/providers/app_config_provider.dart';
 import 'package:bugaoshan/providers/app_info_provider.dart';
 import 'package:bugaoshan/widgets/route/router_utils.dart';
 import 'package:bugaoshan/services/update_service.dart';
@@ -23,6 +24,7 @@ class TestPage extends StatefulWidget {
 
 class _TestPageState extends State<TestPage> {
   final _versionInfoProvider = getIt<AppInfoProvider>();
+  final _appConfig = getIt<AppConfigProvider>();
   final _stableResult = UpdateResultNotifier();
   final _previewResult = UpdateResultNotifier();
 
@@ -241,6 +243,20 @@ class _TestPageState extends State<TestPage> {
             const SizedBox(height: 32),
             if (_supportsUpdate) ...[
               _SectionTitle(title: localizations.updateToLatest),
+              const SizedBox(height: 12),
+              ListenableBuilder(
+                listenable: _appConfig.usePreviewUpdateSource,
+                builder: (context, _) => SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(localizations.usePreviewUpdateSource),
+                  subtitle: Text(
+                    localizations.usePreviewUpdateSourceHint,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  value: _appConfig.usePreviewUpdateSource.value,
+                  onChanged: (v) => _appConfig.usePreviewUpdateSource.value = v,
+                ),
+              ),
               const SizedBox(height: 12),
               UpdateCard(
                 icon: Icons.system_update_alt,
