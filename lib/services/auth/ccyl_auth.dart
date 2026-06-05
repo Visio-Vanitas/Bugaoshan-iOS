@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:bugaoshan/pages/campus/ccyl/models/ccyl_models.dart';
 import 'package:bugaoshan/providers/secure_storage_provider.dart';
 import 'package:bugaoshan/services/auth/ccyl_oauth_service.dart';
 import 'package:bugaoshan/services/ccyl/ccyl_service.dart';

@@ -1,3 +1,4 @@
+import 'package:bugaoshan/pages/campus/ccyl/models/ccyl_models.dart';
 import 'package:bugaoshan/services/auth/ccyl_auth.dart';
 import 'package:bugaoshan/services/ccyl/ccyl_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
