@@ -1,47 +1,45 @@
 import 'package:flutter/foundation.dart';
-import 'package:bugaoshan/services/auth/auth_manager.dart';
+import 'package:bugaoshan/services/auth/ccyl_auth.dart';
 import 'package:bugaoshan/services/ccyl_service.dart';
 
 /// 第二课堂（CCYL）登录状态的 Provider。
 ///
-/// 内部委托给 [AuthManager.ccyl]（[CcylAuthSession]）执行实际鉴权逻辑。
+/// 内部委托给 [CcylAuth] 执行实际鉴权逻辑。
 class CcylProvider extends ChangeNotifier {
-  final AuthManager _authManager;
+  final CcylAuth _ccylAuth;
 
-  CcylProvider._(this._authManager) {
-    _authManager.addListener(_onAuthChanged);
-  }
-
-  static Future<CcylProvider> create(AuthManager authManager) async {
-    final provider = CcylProvider._(authManager);
-    return provider;
+  CcylProvider(this._ccylAuth) {
+    _ccylAuth.addListener(_onAuthChanged);
   }
 
   void _onAuthChanged() => notifyListeners();
 
-  String? get token => _authManager.ccyl.token;
-  bool get isLoggedIn => _authManager.isCcylLoggedIn;
-  CcylService get service => _authManager.ccyl.service;
-  CcylUser? get currentUser => _authManager.ccyl.service.currentUser;
+  String? get token => _ccylAuth.token;
+  bool get isLoggedIn => _ccylAuth.isLoggedIn;
+  CcylService get service => _ccylAuth.service;
+  CcylUser? get currentUser => _ccylAuth.service.currentUser;
 
   @override
   void dispose() {
-    _authManager.removeListener(_onAuthChanged);
+    _ccylAuth.removeListener(_onAuthChanged);
     super.dispose();
   }
 
   Future<void> loginWithOAuthCode(String code) async {
-    await _authManager.ccyl.loginWithCode(code);
+    await _ccylAuth.loginWithCode(code);
     notifyListeners();
   }
 
   Future<void> logout() async {
-    await _authManager.ccyl.logout();
+    await _ccylAuth.logout();
     notifyListeners();
   }
 
   Future<void> reLogin() async {
-    final success = await _authManager.ccyl.reLogin();
-    if (success) notifyListeners();
+    // 触发 getService，如果未登录会自动尝试 reLogin
+    try {
+      await _ccylAuth.getService();
+      notifyListeners();
+    } catch (_) {}
   }
 }

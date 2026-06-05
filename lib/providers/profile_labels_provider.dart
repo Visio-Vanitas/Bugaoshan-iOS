@@ -1,9 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:bugaoshan/injection/injector.dart';
-import 'package:bugaoshan/providers/scu_auth_provider.dart';
+import 'package:bugaoshan/services/api/wfw_api_service.dart';
+import 'package:bugaoshan/services/exceptions/scu_exceptions.dart';
 
 class ProfileLabelsProvider extends ChangeNotifier {
+  final WfwApiService _wfwApi;
+
+  ProfileLabelsProvider(this._wfwApi);
+
   List<Map<String, dynamic>>? _labels;
   bool _loading = false;
   bool _error = false;
@@ -42,28 +45,10 @@ class ProfileLabelsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final json = await getIt<ScuAuthProvider>().service.request((
-        client,
-      ) async {
-        final resp = await client.get(
-          Uri.parse('https://wfw.scu.edu.cn/mashupapp/wap/real/user'),
-          headers: {
-            'Accept': 'application/json, text/plain, */*',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Referer': 'https://wfw.scu.edu.cn',
-          },
-        );
-        return jsonDecode(resp.body) as Map<String, dynamic>;
-      });
-
-      if (json['e'] == 0 && json['d']?['labels'] != null) {
-        _labels = (json['d']['labels'] as List)
-            .map((e) => e as Map<String, dynamic>)
-            .toList();
-        _error = false;
-      } else {
-        _error = true;
-      }
+      _labels = await _wfwApi.fetchProfileLabels();
+      _error = false;
+    } on UnauthenticatedException {
+      _error = true;
     } catch (e) {
       _error = true;
     }

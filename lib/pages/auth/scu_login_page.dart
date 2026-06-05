@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
+import 'package:bugaoshan/services/exceptions/scu_exceptions.dart';
 import 'package:bugaoshan/services/ocr_service.dart';
 
 class ScuLoginPage extends StatefulWidget {
@@ -68,7 +69,7 @@ class _ScuLoginPageState extends State<ScuLoginPage> {
   Future<void> _loadCaptcha() async {
     setState(() => _captchaLoading = true);
     try {
-      final captcha = await getIt<ScuAuthProvider>().authService.fetchCaptcha();
+      final captcha = await getIt<ScuAuth>().fetchCaptcha();
       String? recognizedText;
       try {
         final comma = captcha.captchaBase64.indexOf(',');
@@ -139,9 +140,7 @@ class _ScuLoginPageState extends State<ScuLoginPage> {
       if (!logicRootContext.mounted) return;
       Navigator.of(logicRootContext).pop(true);
     } on ScuLoginException catch (e) {
-      debugPrint(
-        'Login failed: ${e.message} (sessionExpired=${e.sessionExpired})',
-      );
+      debugPrint('Login failed: ${e.message}');
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       setState(() => _errorMsg = _localizeLoginError(e, l10n));
@@ -158,7 +157,6 @@ class _ScuLoginPageState extends State<ScuLoginPage> {
   }
 
   String _localizeLoginError(ScuLoginException e, AppLocalizations l10n) {
-    if (e.sessionExpired) return l10n.sessionExpiredMessage;
     switch (e.message) {
       case 'invalid_captcha':
         return l10n.invalidCaptcha;

@@ -6,11 +6,21 @@ import 'package:bugaoshan/providers/profile_labels_provider.dart';
 import 'package:bugaoshan/providers/train_program_provider.dart';
 import 'package:bugaoshan/providers/app_info_provider.dart';
 import 'package:bugaoshan/providers/app_config_provider.dart';
+import 'package:bugaoshan/providers/balance_query_provider.dart';
 import 'package:bugaoshan/providers/ccyl_provider.dart';
 import 'package:bugaoshan/providers/course_provider.dart';
 import 'package:bugaoshan/providers/grades_provider.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/auth/auth_manager.dart';
+import 'package:bugaoshan/services/api/ccyl_api_service.dart';
+import 'package:bugaoshan/services/api/payapp_api_service.dart';
+import 'package:bugaoshan/services/api/wfw_api_service.dart';
+import 'package:bugaoshan/services/api/zhjw_api_service.dart';
+import 'package:bugaoshan/services/auth/ccyl_auth.dart';
+import 'package:bugaoshan/services/auth/fitness_auth.dart';
+import 'package:bugaoshan/services/auth/payapp_auth.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
+import 'package:bugaoshan/services/auth/wfw_auth.dart';
+import 'package:bugaoshan/services/auth/zhjw_auth.dart';
 import 'package:bugaoshan/services/background_cache_service.dart';
 import 'package:bugaoshan/services/database_service.dart';
 import 'package:bugaoshan/services/download_manager.dart';
@@ -32,7 +42,6 @@ void configureDependencies() {
   getIt.init();
   getIt.registerSingleton<ExitService>(ExitService());
   getIt.registerSingleton<DownloadManager>(DownloadManager());
-  getIt.registerSingleton<ProfileLabelsProvider>(ProfileLabelsProvider());
   _configureAsyncDependencies();
 }
 
@@ -63,42 +72,97 @@ void _configureAsyncDependencies() {
     final db = getIt<DatabaseService>();
     return CourseProvider(db);
   });
-  // AuthManager — 统一认证管理（初始化所有 session）
-  getIt.registerSingletonAsync<AuthManager>(() async {
+
+  // ── 第3层：ScuAuth ──────────────────────────────────────────────
+  getIt.registerSingletonAsync<ScuAuth>(() async {
     await getIt.isReady<SharedPreferences>();
     final prefs = getIt<SharedPreferences>();
-    final mgr = AuthManager(prefs);
-    await mgr.init();
-    return mgr;
+    final auth = ScuAuth(prefs);
+    await auth.init();
+    return auth;
   });
+
+  // ── 第2层：子系统 Auth ──────────────────────────────────────────
+  getIt.registerSingletonAsync<ZhjwAuth>(() async {
+    await getIt.isReady<ScuAuth>();
+    return ZhjwAuth(getIt<ScuAuth>());
+  });
+  getIt.registerSingletonAsync<WfwAuth>(() async {
+    await getIt.isReady<ScuAuth>();
+    return WfwAuth(getIt<ScuAuth>());
+  });
+  getIt.registerSingletonAsync<PayAppAuth>(() async {
+    await getIt.isReady<ScuAuth>();
+    return PayAppAuth(getIt<ScuAuth>());
+  });
+  getIt.registerSingletonAsync<FitnessAuth>(() async {
+    await getIt.isReady<ScuAuth>();
+    return FitnessAuth(getIt<ScuAuth>());
+  });
+  getIt.registerSingletonAsync<CcylAuth>(() async {
+    await getIt.isReady<ScuAuth>();
+    final auth = CcylAuth(getIt<ScuAuth>());
+    await auth.init();
+    return auth;
+  });
+
+  // ── 第1层：API Service ──────────────────────────────────────────
+  getIt.registerSingletonAsync<ZhjwApiService>(() async {
+    await getIt.isReady<ZhjwAuth>();
+    return ZhjwApiService(getIt<ZhjwAuth>());
+  });
+  getIt.registerSingletonAsync<WfwApiService>(() async {
+    await getIt.isReady<WfwAuth>();
+    return WfwApiService(getIt<WfwAuth>());
+  });
+  getIt.registerSingletonAsync<PayAppApiService>(() async {
+    await getIt.isReady<PayAppAuth>();
+    return PayAppApiService(getIt<PayAppAuth>());
+  });
+  getIt.registerSingletonAsync<CcylApiService>(() async {
+    await getIt.isReady<CcylAuth>();
+    return CcylApiService(getIt<CcylAuth>());
+  });
+
+  // ── Provider ────────────────────────────────────────────────────
   getIt.registerSingletonAsync<ScuAuthProvider>(() async {
-    await getIt.isReady<AuthManager>();
-    final provider = ScuAuthProvider(getIt<AuthManager>());
+    await getIt.isReady<ScuAuth>();
+    await getIt.isReady<CcylAuth>();
+    final provider = ScuAuthProvider(getIt<ScuAuth>(), getIt<CcylAuth>());
     await provider.init();
     return provider;
   });
   getIt.registerSingletonAsync<CcylProvider>(() async {
-    await getIt.isReady<AuthManager>();
-    return CcylProvider.create(getIt<AuthManager>());
+    await getIt.isReady<CcylAuth>();
+    return CcylProvider(getIt<CcylAuth>());
+  });
+  getIt.registerSingletonAsync<ProfileLabelsProvider>(() async {
+    await getIt.isReady<WfwApiService>();
+    return ProfileLabelsProvider(getIt<WfwApiService>());
   });
   getIt.registerSingletonAsync<GradesProvider>(() async {
     await getIt.isReady<SharedPreferences>();
-    await getIt.isReady<ScuAuthProvider>();
+    await getIt.isReady<ZhjwApiService>();
     final prefs = getIt<SharedPreferences>();
-    final auth = getIt<ScuAuthProvider>();
-    return GradesProvider(prefs, auth);
+    final zhjwApi = getIt<ZhjwApiService>();
+    return GradesProvider(prefs, zhjwApi);
   });
   getIt.registerSingletonAsync<TrainProgramProvider>(() async {
-    await getIt.isReady<ScuAuthProvider>();
-    final auth = getIt<ScuAuthProvider>();
-    return TrainProgramProvider(auth);
+    await getIt.isReady<ZhjwApiService>();
+    return TrainProgramProvider(getIt<ZhjwApiService>());
   });
   getIt.registerSingletonAsync<PlanCompletionProvider>(() async {
     await getIt.isReady<SharedPreferences>();
-    await getIt.isReady<ScuAuthProvider>();
+    await getIt.isReady<ZhjwApiService>();
     final prefs = getIt<SharedPreferences>();
-    final auth = getIt<ScuAuthProvider>();
-    return PlanCompletionProvider(prefs, auth);
+    final zhjwApi = getIt<ZhjwApiService>();
+    return PlanCompletionProvider(prefs, zhjwApi);
+  });
+  getIt.registerSingletonAsync<BalanceQueryProvider>(() async {
+    await getIt.isReady<SharedPreferences>();
+    await getIt.isReady<PayAppApiService>();
+    final prefs = getIt<SharedPreferences>();
+    return BalanceQueryProvider(prefs, getIt<PayAppApiService>());
   });
   getIt.registerSingletonAsync<UpdateService>(() async {
     await getIt.isReady<SharedPreferences>();

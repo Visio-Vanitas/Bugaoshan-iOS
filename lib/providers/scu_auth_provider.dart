@@ -7,9 +7,10 @@ import 'package:bugaoshan/providers/ccyl_provider.dart';
 import 'package:bugaoshan/providers/plan_completion_provider.dart';
 import 'package:bugaoshan/providers/profile_labels_provider.dart';
 import 'package:bugaoshan/providers/secure_storage_provider.dart';
-import 'package:bugaoshan/services/auth/auth_manager.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
+import 'package:bugaoshan/services/auth/ccyl_auth.dart';
+import 'package:bugaoshan/services/exceptions/scu_exceptions.dart';
 import 'package:bugaoshan/services/ocr_service.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
 
 const _keyAutoLogin = 'scu_auto_login';
 const _keyUserRealname = 'scu_user_realname';
@@ -17,12 +18,13 @@ const _keyUserNumber = 'scu_user_number';
 
 /// 持久化 SCU 登录状态的 Provider，注册为 singleton。
 ///
-/// 内部委托给 [AuthManager.scu]（[ScuAuthSession]）执行实际鉴权逻辑。
+/// 内部委托给 [ScuAuth] 执行实际鉴权逻辑。
 class ScuAuthProvider extends ChangeNotifier {
-  final AuthManager _authManager;
+  final ScuAuth _scuAuth;
+  final CcylAuth _ccylAuth;
 
-  ScuAuthProvider(this._authManager) {
-    _authManager.addListener(_onAuthChanged);
+  ScuAuthProvider(this._scuAuth, this._ccylAuth) {
+    _scuAuth.addListener(_onAuthChanged);
   }
 
   void _onAuthChanged() => notifyListeners();
@@ -39,18 +41,16 @@ class ScuAuthProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _authManager.removeListener(_onAuthChanged);
+    _scuAuth.removeListener(_onAuthChanged);
     super.dispose();
   }
 
-  String? get accessToken => _authManager.scu.accessToken;
-  ScuAuthService get authService => _authManager.scu.authService;
+  String? get accessToken => _scuAuth.accessToken;
   String? get userRealname => _userRealname;
   String? get userNumber => _userNumber;
   bool get isAutoLoggingIn => _isAutoLoggingIn;
-  bool get isLoggedIn => _authManager.isScuLoggedIn;
-  bool get isExpired => _authManager.scu.isExpired;
-  ScuApiService get service => _authManager.apiService;
+  bool get isLoggedIn => _scuAuth.isReady;
+  bool get isExpired => _scuAuth.isExpired;
 
   Future<void> login({
     required String username,
@@ -58,7 +58,7 @@ class ScuAuthProvider extends ChangeNotifier {
     required String captchaCode,
     required String captchaText,
   }) async {
-    await _authManager.scu.login(
+    await _scuAuth.login(
       username: username,
       password: password,
       captchaCode: captchaCode,
@@ -72,7 +72,8 @@ class ScuAuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _authManager.logoutAll();
+    _scuAuth.logout();
+    _ccylAuth.logout();
     _userRealname = null;
     _userNumber = null;
     final prefs = getIt<SharedPreferences>();
@@ -85,7 +86,7 @@ class ScuAuthProvider extends ChangeNotifier {
 
   Future<void> fetchUserInfo() async {
     try {
-      final client = await _authManager.scu.getClient();
+      final client = await _scuAuth.getClient();
       try {
         final resp = await client.get(
           Uri.parse('https://wfw.scu.edu.cn/uc/wap/user/get-info'),
@@ -111,15 +112,15 @@ class ScuAuthProvider extends ChangeNotifier {
   }
 
   Future<Map<String, String>?> getSavedCredentials() async {
-    return await _authManager.scu.getSavedCredentials();
+    return await _scuAuth.getSavedCredentials();
   }
 
   Future<void> saveCredentials(String username, String password) async {
-    await _authManager.scu.saveCredentials(username, password);
+    await _scuAuth.saveCredentials(username, password);
   }
 
   Future<void> clearCredentials() async {
-    await _authManager.scu.clearCredentials();
+    await _scuAuth.clearCredentials();
   }
 
   Future<bool> isAutoLoginEnabled() async {
@@ -149,7 +150,7 @@ class ScuAuthProvider extends ChangeNotifier {
       const maxRetries = 5;
       for (int attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          final captcha = await _authManager.scu.authService.fetchCaptcha();
+          final captcha = await _scuAuth.fetchCaptcha();
 
           String captchaText;
           try {

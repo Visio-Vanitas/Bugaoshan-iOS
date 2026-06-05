@@ -1,28 +1,28 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:bugaoshan/providers/secure_storage_provider.dart';
-import 'package:bugaoshan/services/auth/auth_session.dart';
-import 'package:bugaoshan/services/auth/auth_state.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
 import 'package:bugaoshan/services/ccyl_oauth_service.dart';
 import 'package:bugaoshan/services/ccyl_service.dart';
+import 'package:bugaoshan/services/exceptions/scu_exceptions.dart';
 
 const _keyCcylToken = 'ccyl_token';
 const _keyCcylUserId = 'ccyl_user_id';
 
-/// 第二课堂（CCYL）认证会话。
+/// 第二课堂认证（第2层）
 ///
 /// CCYL 拥有独立于 SCU 的 OAuth token 体系，不共享 session cookie。
-/// 初始登录时需要依赖 [ScuAuthSession] 获取 OAuth code，后续完全独立。
-class CcylAuthSession extends AuthSession<http.Client> {
+/// 初始登录时通过 [CcylOAuthService] 从 SCU 获取 OAuth code，后续完全独立。
+class CcylAuth extends ChangeNotifier {
   final CcylService _service = CcylService();
 
   String? _token;
 
-  @override
-  String get serviceName => '第二课堂';
+  CcylAuth(ScuAuth scuAuth); // scuAuth 保留参数签名，CcylOAuthService 内部通过 getIt 获取
 
   CcylService get service => _service;
   String? get token => _token;
+  bool get isLoggedIn => _service.isLoggedIn;
 
   /// 从安全存储恢复 token（应用启动时调用）。
   Future<void> init() async {
@@ -31,24 +31,34 @@ class CcylAuthSession extends AuthSession<http.Client> {
     final userId = await secure.read(key: _keyCcylUserId);
     if (_token != null) {
       _service.restoreToken(_token!, userId);
-      state = AuthState.ready;
     }
   }
 
-  @override
-  Future<http.Client> getClient() async {
-    if (isExpired) {
-      final refreshed = await refresh();
-      if (!refreshed) {
-        throw CcylException('第二课堂登录已过期');
+  /// 获取已认证的 CcylService。
+  ///
+  /// 如果未登录，自动尝试通过 SCU OAuth 重新登录。
+  /// 失败时抛 [UnauthenticatedException]。
+  Future<CcylService> getService() async {
+    if (!_service.isLoggedIn) {
+      final success = await _reLogin();
+      if (!success) {
+        throw const UnauthenticatedException('第二课堂未登录');
       }
     }
+    return _service;
+  }
 
+  /// 获取已认证的 HTTP Client（自动注入 token 头）。
+  ///
+  /// 如果未登录，自动尝试通过 SCU OAuth 重新登录。
+  /// 失败时抛 [UnauthenticatedException]。
+  Future<http.Client> getClient() async {
     if (!_service.isLoggedIn) {
-      throw CcylException('第二课堂未登录');
+      final success = await _reLogin();
+      if (!success) {
+        throw const UnauthenticatedException('第二课堂未登录');
+      }
     }
-
-    // 返回自动注入 Authorization 头的包装 Client
     return _CcylAuthClient(_token!);
   }
 
@@ -57,11 +67,11 @@ class CcylAuthSession extends AuthSession<http.Client> {
     await _service.login(code);
     _token = _service.token;
     await _saveToSecure();
-    state = AuthState.ready;
+    notifyListeners();
   }
 
-  /// 尝试通过 SCU 自动恢复 CCYL 登录（OAuth 静默绑定）。
-  Future<bool> reLogin() async {
+  /// 通过 SCU 自动恢复 CCYL 登录（OAuth 静默绑定）。
+  Future<bool> _reLogin() async {
     try {
       final oauth = CcylOAuthService();
       final oauthCode = await oauth.getOAuthCode();
@@ -69,21 +79,12 @@ class CcylAuthSession extends AuthSession<http.Client> {
       await _service.login(oauthCode);
       _token = _service.token;
       await _saveToSecure();
-      state = AuthState.ready;
+      notifyListeners();
       return true;
     } catch (e) {
-      debugPrint('CcylSession.reLogin error: $e');
+      debugPrint('CcylAuth.reLogin error: $e');
       return false;
     }
-  }
-
-  @override
-  Future<bool> refresh() async {
-    final success = await reLogin();
-    if (!success) {
-      state = AuthState.expired;
-    }
-    return success;
   }
 
   Future<void> _saveToSecure() async {
@@ -95,19 +96,17 @@ class CcylAuthSession extends AuthSession<http.Client> {
     }
   }
 
-  @override
   Future<void> logout() async {
     _service.logout();
     _token = null;
     final secure = SecureStorageProvider.instance;
     await secure.delete(key: _keyCcylToken);
     await secure.delete(key: _keyCcylUserId);
-    state = AuthState.unknown;
+    notifyListeners();
   }
 }
 
 /// 自动注入 CCYL token 请求头的 HTTP Client 包装。
-/// 使用与 [CcylService._authHeaders] 一致的 `token` 头。
 class _CcylAuthClient extends http.BaseClient {
   final String token;
   final http.Client _inner = http.Client();

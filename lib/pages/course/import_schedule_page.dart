@@ -5,7 +5,8 @@ import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/models/course.dart';
 import 'package:bugaoshan/providers/course_provider.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
+import 'package:bugaoshan/services/api/zhjw_api_service.dart';
+import 'package:bugaoshan/services/exceptions/scu_exceptions.dart';
 import 'package:bugaoshan/widgets/dialog/dialog.dart';
 import 'package:bugaoshan/widgets/route/router_utils.dart';
 
@@ -235,8 +236,8 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
     // 1. 获取学期列表
     List<({String value, String label})> semesters;
     try {
-      semesters = await authProvider.service.fetchSemesters();
-    } on ScuLoginException catch (e) {
+      semesters = await getIt<ZhjwApiService>().fetchSemesters();
+    } on ScuException catch (e) {
       if (mounted) showInfoDialog(title: l10n.importFailed, content: e.message);
       if (mounted) setState(() => _loading = false);
       return;
@@ -308,7 +309,7 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
     try {
       for (final semester in toImport) {
         setState(() => _currentProgress++);
-        final data = await authProvider.service.fetchJwxtSchedule(
+        final data = await getIt<ZhjwApiService>().fetchJwxtSchedule(
           planCode: semester.value,
         );
         if (!mounted) return;
@@ -390,7 +391,7 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
         );
         if (setWeek == true && mounted) {
           try {
-            final week = await authProvider.service.fetchCurrentWeek();
+            final week = await getIt<ZhjwApiService>().fetchCurrentWeek();
             if (!mounted) return;
             final now = DateTime.now();
             final today = DateTime(now.year, now.month, now.day);
@@ -418,7 +419,7 @@ class _ImportSchedulePageState extends State<ImportSchedulePage> {
           Navigator.of(logicRootContext).pop();
         }
       }
-    } on ScuLoginException catch (e) {
+    } on ScuException catch (e) {
       if (mounted) showInfoDialog(title: l10n.importFailed, content: e.message);
     } catch (e) {
       debugPrint('Import from jwxt error: $e');

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/auth/auth_manager.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
+import 'package:bugaoshan/services/exceptions/scu_exceptions.dart';
 import 'package:bugaoshan/utils/constants.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
@@ -64,8 +64,9 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
     });
 
     try {
-      final mgr = getIt<AuthManager>();
-      await mgr.scu.request((client) async {
+      final scuAuth = getIt<ScuAuth>();
+      final client = await scuAuth.getClient();
+      try {
         final userResp = await client.get(
           Uri.parse('$_base/uc/wap/user/get-info'),
           headers: _headers,
@@ -91,9 +92,10 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
         if (mounted) {
           setState(() => _loading = false);
         }
-        return true;
-      });
-    } on ScuLoginException catch (_) {
+      } finally {
+        client.close();
+      }
+    } on UnauthenticatedException catch (_) {
       if (mounted) {
         setState(() {
           _loading = false;
@@ -137,8 +139,9 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
     if (confirm != true) return;
 
     try {
-      final mgr = getIt<AuthManager>();
-      await mgr.scu.request((client) async {
+      final scuAuth = getIt<ScuAuth>();
+      final client = await scuAuth.getClient();
+      try {
         final resp = await client.post(
           Uri.parse('$_base/netclient/wap/default/offline'),
           headers: {
@@ -154,9 +157,10 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
         }
         _showSnackBar(l10n.networkDeviceOperationSuccess);
         _loadData();
-        return true;
-      });
-    } on ScuLoginException catch (_) {
+      } finally {
+        client.close();
+      }
+    } on UnauthenticatedException catch (_) {
       _showSnackBar(l10n.networkOfflineFailed, isError: true);
     } catch (e) {
       debugPrint('Force offline error: $e');

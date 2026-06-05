@@ -25,7 +25,7 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
   @override
   void initState() {
     super.initState();
-    _provider = BalanceQueryProvider(getIt());
+    _provider = getIt<BalanceQueryProvider>();
     _provider.addListener(_onProviderChanged);
     getIt<ScuAuthProvider>().addListener(_onAuthChanged);
     _initProvider();
