@@ -1,22 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:bugaoshan/injection/injector.dart';
-import 'package:bugaoshan/services/auth/auth_manager.dart';
-import 'package:bugaoshan/services/balance_query_service.dart';
+import 'package:bugaoshan/services/api/payapp_api_service.dart';
+import 'package:bugaoshan/services/api/balance_query_service.dart';
 
 const _keyBindingInfo = 'balance_query_binding';
 const _keyCurrentRoomIndex = 'balance_query_current_room';
 
 class BalanceQueryProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
-  final BalanceQueryService _service = BalanceQueryService();
+  final PayAppApiService _payappApi;
 
-  BalanceQueryProvider(this._prefs) {
+  BalanceQueryProvider(this._prefs, this._payappApi) {
     _loadBindingInfo();
   }
-
-  AuthManager get _authManager => getIt<AuthManager>();
 
   List<RoomBinding> _bindings = [];
   List<RoomBinding> get bindings => _bindings;
@@ -94,17 +91,14 @@ class BalanceQueryProvider extends ChangeNotifier {
 
     try {
       final binding = currentBinding!;
-      await _authManager.payApp.request(
-        (client) => _service.verificationRoom(
-          client,
-          binding.cusNo,
-          1,
-          binding.cusName,
-          binding.schoolCode,
-          binding.regCode,
-          binding.unitCode,
-          binding.roomNo,
-        ),
+      await _payappApi.verificationRoom(
+        cusNo: binding.cusNo,
+        type: 1,
+        cusName: binding.cusName,
+        schoolCode: binding.schoolCode,
+        regCode: binding.regCode,
+        unitCode: binding.unitCode,
+        roomNo: binding.roomNo,
       );
     } finally {
       _isSwitching = false;
@@ -113,21 +107,15 @@ class BalanceQueryProvider extends ChangeNotifier {
   }
 
   Future<List<CampusItem>> getCampusList() async {
-    return await _authManager.payApp.request(
-      (client) => _service.getCampus(client),
-    );
+    return await _payappApi.getCampus();
   }
 
   Future<List<BuildingItem>> getArchitectureList(String schoolCode) async {
-    return await _authManager.payApp.request(
-      (client) => _service.getArchitecture(client, schoolCode),
-    );
+    return await _payappApi.getArchitecture(schoolCode);
   }
 
   Future<List<UnitItem>> getUnitList(String schoolCode, String regCode) async {
-    return await _authManager.payApp.request(
-      (client) => _service.getUnit(client, schoolCode, regCode),
-    );
+    return await _payappApi.getUnit(schoolCode, regCode);
   }
 
   Future<bool> verifyRoom(
@@ -139,17 +127,14 @@ class BalanceQueryProvider extends ChangeNotifier {
     String unitCode,
     String roomNo,
   ) async {
-    return await _authManager.payApp.request(
-      (client) => _service.verificationRoom(
-        client,
-        cusNo,
-        type,
-        cusName,
-        schoolCode,
-        regCode,
-        unitCode,
-        roomNo,
-      ),
+    return await _payappApi.verificationRoom(
+      cusNo: cusNo,
+      type: type,
+      cusName: cusName,
+      schoolCode: schoolCode,
+      regCode: regCode,
+      unitCode: unitCode,
+      roomNo: roomNo,
     );
   }
 
@@ -157,9 +142,10 @@ class BalanceQueryProvider extends ChangeNotifier {
     final binding = currentBinding;
     if (binding == null) throw BalanceQueryException('未绑定房间');
 
-    _electricInfo = await _authManager.payApp.request(
-      (client) =>
-          _service.queryRoomInfo(client, binding.cusNo, 1, binding.cusName),
+    _electricInfo = await _payappApi.queryRoomInfo(
+      cusNo: binding.cusNo,
+      type: 1,
+      cusName: binding.cusName,
     );
     notifyListeners();
     return _electricInfo!;
@@ -169,9 +155,10 @@ class BalanceQueryProvider extends ChangeNotifier {
     final binding = currentBinding;
     if (binding == null) throw BalanceQueryException('未绑定房间');
 
-    _acInfo = await _authManager.payApp.request(
-      (client) =>
-          _service.queryRoomInfo(client, binding.cusNo, 2, binding.cusName),
+    _acInfo = await _payappApi.queryRoomInfo(
+      cusNo: binding.cusNo,
+      type: 2,
+      cusName: binding.cusName,
     );
     notifyListeners();
     return _acInfo!;

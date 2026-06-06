@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/ccyl_provider.dart';
-import 'package:bugaoshan/services/ccyl_oauth_service.dart';
+import 'package:bugaoshan/services/auth/ccyl_oauth_service.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
 
 class CcylBindPage extends StatefulWidget {
   const CcylBindPage({super.key});
@@ -12,7 +13,9 @@ class CcylBindPage extends StatefulWidget {
 }
 
 class _CcylBindPageState extends State<CcylBindPage> {
-  final _oauthService = CcylOAuthService();
+  late final CcylOAuthService _oauthService = CcylOAuthService(
+    getIt<ScuAuth>(),
+  );
   bool _loading = false;
   String? _error;
 

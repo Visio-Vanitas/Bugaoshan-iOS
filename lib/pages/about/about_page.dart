@@ -32,15 +32,15 @@ class _AboutPageState extends State<AboutPage> {
     appConfig.hasUpdateNotification.value = false;
     setState(() => _isCheckingUpdate = true);
     try {
-      final latest = await updateService.getLatestReleaseFromGitHub();
+      final includePreview = appConfig.usePreviewUpdateSource.value;
+      final result = await updateService.checkForUpdate(
+        includePreview: includePreview,
+        currentVersion: versionProvider.currentVersion,
+        gitTag: includePreview ? versionProvider.gitTag : null,
+      );
       if (!mounted) return;
 
-      if (latest != null &&
-          latest.tagName != null &&
-          updateService.hasUpdate(
-            versionProvider.currentVersion,
-            latest.tagName!,
-          )) {
+      if (result.hasUpdate && result.release != null) {
         await showDialog(
           context: context,
           barrierDismissible: false,
@@ -56,10 +56,11 @@ class _AboutPageState extends State<AboutPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text('${localizations.version}: ${latest.tagName}')],
+                children: [Text('${localizations.version}: ${result.version}')],
               ),
               actions: [
-                if (latest.body != null && latest.body!.isNotEmpty)
+                if (result.releaseNotes != null &&
+                    result.releaseNotes!.isNotEmpty)
                   TextButton(
                     onPressed: () {
                       Navigator.of(dialogContext).pop();
@@ -67,8 +68,8 @@ class _AboutPageState extends State<AboutPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ReleaseNotesPage(
-                            version: latest.tagName!,
-                            releaseNotes: latest.body!,
+                            version: result.version!,
+                            releaseNotes: result.releaseNotes!,
                           ),
                         ),
                       );
@@ -79,11 +80,11 @@ class _AboutPageState extends State<AboutPage> {
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   child: Text(localizations.neverMind),
                 ),
-                if (latest.downloadUrl != null)
+                if (result.downloadUrl != null)
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(dialogContext).pop();
-                      _startUpdate(latest.tagName!, latest.downloadUrl!);
+                      _startUpdate(result.version!, result.downloadUrl!);
                     },
                     child: Text(localizations.startUpdate),
                   ),
@@ -93,6 +94,11 @@ class _AboutPageState extends State<AboutPage> {
         );
 
         if (!mounted) return;
+      } else if (result.status == UpdateCheckStatus.error) {
+        showInfoDialog(
+          title: localizations.checkForUpdates,
+          content: localizations.loadFailed,
+        );
       } else {
         showInfoDialog(
           title: localizations.checkForUpdates,

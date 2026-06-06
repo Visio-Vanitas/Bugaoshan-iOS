@@ -42,23 +42,14 @@ class CourseCard extends StatelessWidget {
             : Colors.white;
         final fontSize = appConfig.courseCardFontSize.value;
         final smallFontSize = fontSize - 1;
-        final details = <({IconData icon, String text, int preferredMaxLines})>[
+        final details = <({String text, int preferredMaxLines})>[
           if (config.showLocation && course.location.isNotEmpty)
-            (
-              icon: Icons.location_on_outlined,
-              text: course.location,
-              preferredMaxLines: 2,
-            ),
+            (text: course.location, preferredMaxLines: 2),
           if (config.showTeacherName && course.teacher.isNotEmpty)
-            (
-              icon: Icons.person_outline,
-              text: course.teacher,
-              preferredMaxLines: 1,
-            ),
+            (text: course.teacher, preferredMaxLines: 1),
           (
-            icon: Icons.calendar_today_outlined,
-            text: '${course.startWeek}-${course.endWeek}${l10n.week}',
-            preferredMaxLines: 1,
+            text: l10n.weekRange(course.startWeek, course.endWeek),
+            preferredMaxLines: 2,
           ),
         ];
 
@@ -70,11 +61,10 @@ class CourseCard extends StatelessWidget {
               final height = constraints.maxHeight;
               final detailLineBudget = switch (height) {
                 < 56 => 0,
-                < 100 => 2,
-                _ => 4,
+                < 100 => 3,
+                _ => 5,
               };
-              final visibleDetails =
-                  <({IconData icon, String text, int preferredMaxLines})>[];
+              final visibleDetails = <({String text, int preferredMaxLines})>[];
               var usedDetailLines = 0;
               for (final detail in details) {
                 final nextUsedLines =
@@ -122,7 +112,6 @@ class CourseCard extends StatelessWidget {
                             const SizedBox(height: 2),
                           ...visibleDetails.map(
                             (detail) => _buildIconText(
-                              detail.icon,
                               detail.text,
                               smallFontSize,
                               textColor,
@@ -143,7 +132,6 @@ class CourseCard extends StatelessWidget {
   }
 
   Widget _buildIconText(
-    IconData icon,
     String text,
     double fontSize,
     Color color, {
@@ -154,6 +142,7 @@ class CourseCard extends StatelessWidget {
       child: Text(
         text,
         maxLines: maxLines,
+        softWrap: true,
         style: TextStyle(
           fontSize: fontSize,
           color: color.withAlpha(230),

@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bugaoshan/pages/campus/plan_completion/models/plan_completion.dart';
-import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
-import 'package:bugaoshan/utils/constants.dart';
+import 'package:bugaoshan/services/api/zhjw_api_service.dart';
+import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 
 const _keyPlanCompletion = 'plan_completion_nodes';
 
@@ -13,9 +12,9 @@ enum PlanCompletionLoadState { idle, loading, loaded, error }
 
 class PlanCompletionProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
-  final ScuAuthProvider _authProvider;
+  final ZhjwApiService _zhjwApi;
 
-  PlanCompletionProvider(this._prefs, this._authProvider) {
+  PlanCompletionProvider(this._prefs, this._zhjwApi) {
     final cached = _prefs.getString(_keyPlanCompletion);
     if (cached != null) {
       try {
@@ -57,38 +56,32 @@ class PlanCompletionProvider extends ChangeNotifier {
     _safeNotify();
 
     try {
-      final body = await _authProvider.service.request((client) async {
-        final resp = await client.get(
-          Uri.parse('$kZhjwBase/student/integratedQuery/planCompletion/index'),
-          headers: {
-            'Accept': 'text/html,*/*',
-            'Referer': '$kZhjwBase/',
-            'User-Agent': kDefaultUserAgent,
-          },
-        );
-        return resp.body;
-      });
-
-      // Check for rate limiting
-      if (body.contains('请勿频繁刷新')) {
-        if (_nodes.isNotEmpty) {
-          _state = PlanCompletionLoadState.loaded;
-          _error = 'rateLimited';
-        } else {
-          _state = PlanCompletionLoadState.error;
-          _error = 'rateLimited';
-        }
-        return;
-      }
-
-      if (body.startsWith('<') && !body.contains('zNodes')) {
-        throw ScuLoginException('登录已过期，请重新登录', sessionExpired: true);
-      }
-
-      _nodes = _parseZNodes(body);
+      _nodes = await _zhjwApi.fetchPlanCompletion();
       _state = PlanCompletionLoadState.loaded;
       _error = null;
       await _saveToCache();
+    } on RateLimitedException catch (_) {
+      if (_nodes.isNotEmpty) {
+        _state = PlanCompletionLoadState.loaded;
+      } else {
+        _state = PlanCompletionLoadState.error;
+      }
+      _error = 'rateLimited';
+    } on ServiceException catch (e) {
+      if (_nodes.isNotEmpty) {
+        _state = PlanCompletionLoadState.loaded;
+        _error = e.message;
+      } else {
+        _state = PlanCompletionLoadState.error;
+        _error = e.message;
+      }
+    } on UnauthenticatedException {
+      if (_nodes.isNotEmpty) {
+        _state = PlanCompletionLoadState.loaded;
+      } else {
+        _state = PlanCompletionLoadState.error;
+      }
+      _error = 'unauthenticated';
     } catch (e) {
       if (_nodes.isNotEmpty) {
         _state = PlanCompletionLoadState.loaded;
@@ -121,23 +114,5 @@ class PlanCompletionProvider extends ChangeNotifier {
     _state = PlanCompletionLoadState.idle;
     _error = null;
     await _prefs.remove(_keyPlanCompletion);
-  }
-
-  List<PlanCompletionNode> _parseZNodes(String html) {
-    final match = RegExp(
-      r'var\s+zNodes\s*=\s*(\[.*?\]);',
-      dotAll: true,
-    ).firstMatch(html);
-    if (match == null) return [];
-
-    final jsonStr = match.group(1)!;
-    try {
-      final List<dynamic> list = jsonDecode(jsonStr);
-      return list
-          .map((e) => PlanCompletionNode.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (_) {
-      return [];
-    }
   }
 }

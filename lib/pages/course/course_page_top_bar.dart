@@ -85,55 +85,11 @@ class _TopBar extends StatelessWidget {
                             : Theme.of(context).disabledColor,
                       ),
                     ),
-                    if (isCurrentCalendarWeek) ...[
-                      const SizedBox(width: 3),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          l10n.thisWeek,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 9,
-                              ),
-                        ),
-                      ),
-                    ] else ...[
-                      const SizedBox(width: 3),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          l10n.actualCurrentWeek(config.getCurrentWeek()),
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSecondaryContainer,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 9,
-                              ),
-                        ),
-                      ),
-                    ],
+                    const SizedBox(width: 3),
+                    _WeekBadge(
+                      isCurrentCalendarWeek: isCurrentCalendarWeek,
+                      actualCurrentWeek: config.getCurrentWeek(),
+                    ),
                   ],
                 ),
               ],
@@ -164,5 +120,50 @@ class _TopBar extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _WeekBadge extends StatelessWidget {
+  final bool isCurrentCalendarWeek;
+  final int actualCurrentWeek;
+
+  const _WeekBadge({
+    required this.isCurrentCalendarWeek,
+    required this.actualCurrentWeek,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final isCurrent = isCurrentCalendarWeek;
+    final text = isCurrent
+        ? l10n.thisWeek
+        : l10n.actualCurrentWeek(actualCurrentWeek);
+
+    final textWidget = Text(
+      text,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: isCurrent
+            ? scheme.onPrimaryContainer
+            : scheme.onSecondaryContainer,
+        fontWeight: FontWeight.w600,
+        fontSize: 9,
+      ),
+    );
+
+    final body = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: isCurrent ? scheme.primaryContainer : scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: AnimatedSize(
+        duration: appConfigService.cardSizeAnimationDuration.value,
+        curve: appCurve,
+        child: textWidget,
+      ),
+    );
+    return body;
   }
 }

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/pages/auth/scu_login_page.dart';
-import 'package:bugaoshan/services/auth/auth_manager.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
 import 'package:bugaoshan/widgets/route/router_utils.dart';
 
 /// 全局 session 过期监听器。
 ///
-/// 包裹在 [MaterialApp] 内层，监听所有 [AuthSession] 的刷新失败事件，
+/// 包裹在 [MaterialApp] 内层，监听 [ScuAuth.onSessionExpired] 回调，
 /// 统一显示带「前往登录」action 的 [SnackBar]。
 class SessionExpiredListener extends StatefulWidget {
   final Widget child;
@@ -23,7 +23,7 @@ class _SessionExpiredListenerState extends State<SessionExpiredListener> {
   @override
   void initState() {
     super.initState();
-    getIt<AuthManager>().onSessionExpired(_onSessionExpired);
+    getIt<ScuAuth>().onSessionExpired = _onSessionExpired;
   }
 
   void _onSessionExpired() {
@@ -52,7 +52,7 @@ class _SessionExpiredListenerState extends State<SessionExpiredListener> {
         ),
       );
 
-    // 冷却期 5s，防止短时间内多个 session 同时失败重复弹出
+    // 冷却期 5s，防止短时间内重复弹出
     Future.delayed(const Duration(seconds: 5), () => _handling = false);
   }
 

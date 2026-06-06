@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
-import 'package:bugaoshan/providers/profile_labels_provider.dart';
+import 'package:bugaoshan/providers/user_info_provider.dart';
 
-class UserInfoCard extends StatelessWidget {
-  final ProfileLabelsProvider labelsProvider;
-  final VoidCallback onRetry;
-  final bool isLoggedIn;
+class UserInfoCard extends StatefulWidget {
+  const UserInfoCard({super.key});
 
-  const UserInfoCard({
-    super.key,
-    required this.labelsProvider,
-    required this.onRetry,
-    required this.isLoggedIn,
-  });
+  @override
+  State<UserInfoCard> createState() => _UserInfoCardState();
+}
+
+class _UserInfoCardState extends State<UserInfoCard> {
+  final _provider = getIt<UserInfoProvider>();
+
+  @override
+  void initState() {
+    super.initState();
+    _provider.addListener(_onChanged);
+  }
+
+  @override
+  void dispose() {
+    _provider.removeListener(_onChanged);
+    super.dispose();
+  }
+
+  void _onChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,40 +35,27 @@ class UserInfoCard extends StatelessWidget {
     final localizations = AppLocalizations.of(context)!;
     final primaryColor = theme.colorScheme.primary;
 
+    // 未登录或尚未获取，不显示
+    if (!_provider.hasData && !_provider.loading && !_provider.error) {
+      return const SizedBox.shrink();
+    }
+
     Widget child;
     VoidCallback? onTap;
 
-    if (!isLoggedIn) {
-      child = Row(
-        children: [
-          Icon(
-            Icons.lock_outline_rounded,
-            size: 20,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 14),
-          Text(
-            localizations.loginToViewUserInfo,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      );
-      onTap = null;
-    } else if (labelsProvider.loading) {
+    if (_provider.loading) {
       child = _buildLoadingContent(theme, localizations);
       onTap = null;
-    } else if (labelsProvider.error) {
+    } else if (_provider.error) {
       child = _buildErrorContent(theme, localizations, primaryColor);
-      onTap = onRetry;
+      onTap = _provider.retry;
     } else {
-      final labels = labelsProvider.labels;
+      final labels = _provider.labels;
       if (labels == null || labels.isEmpty) {
         return const SizedBox.shrink();
       }
       child = _buildLabelsContent(theme, primaryColor, localizations, labels);
-      onTap = onRetry;
+      onTap = _provider.retry;
     }
 
     final card = Container(

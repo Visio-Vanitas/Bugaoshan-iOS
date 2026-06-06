@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/auth/auth_manager.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
+import 'package:bugaoshan/services/auth/fitness_auth.dart';
+import 'package:bugaoshan/services/auth/scu_exceptions.dart';
+import 'package:bugaoshan/services/auth/cookie_client.dart';
 import 'package:bugaoshan/utils/constants.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
@@ -83,13 +84,18 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     }
   }
 
-  /// 通过 AuthSession.request 发送带自动刷新+重试的请求。
+  /// 通过 FitnessAuth 发送带自动重试的请求。
   /// [fn] 接收已认证的 CookieClient 并返回响应数据。
   Future<T> _fitnessRequest<T>(
     Future<T> Function(CookieClient client) fn,
   ) async {
-    final mgr = getIt<AuthManager>();
-    return await mgr.fitness.request(fn);
+    try {
+      final client = await getIt<FitnessAuth>().getClient();
+      return await fn(client);
+    } on UnauthenticatedException {
+      final client = await getIt<FitnessAuth>().getClient();
+      return await fn(client);
+    }
   }
 
   Future<void> _loadData() async {
@@ -126,7 +132,7 @@ class _FitnessTestPageState extends State<FitnessTestPage>
         }
         return true;
       });
-    } on ScuLoginException catch (_) {
+    } on UnauthenticatedException catch (_) {
       if (mounted) {
         setState(() {
           _loading = false;

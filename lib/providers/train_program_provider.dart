@@ -1,18 +1,15 @@
-import 'dart:convert';
-
 import 'package:flutter/widgets.dart';
 import 'package:bugaoshan/pages/campus/train_program/models/train_program.dart';
 import 'package:bugaoshan/pages/campus/train_program/models/train_program_model.dart';
-import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
-import 'package:bugaoshan/utils/constants.dart';
+import 'package:bugaoshan/services/api/zhjw_api_service.dart';
+import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 
 enum TrainProgramLoadState { idle, loading, loaded, error }
 
 class TrainProgramProvider extends ChangeNotifier {
-  final ScuAuthProvider _authProvider;
+  final ZhjwApiService _zhjwApi;
 
-  TrainProgramProvider(this._authProvider);
+  TrainProgramProvider(this._zhjwApi);
 
   List<College> _colleges = [];
   List<Grade> _grades = [];
@@ -83,25 +80,25 @@ class TrainProgramProvider extends ChangeNotifier {
     _safeNotify();
 
     try {
-      final body = await _authProvider.service.request((client) async {
-        final resp = await client.get(
-          Uri.parse(
-            '$kZhjwBase/student/comprehensiveQuery/search/trainProgram/index',
-          ),
-          headers: {
-            'Accept': 'text/html,*/*',
-            'Referer': '$kZhjwBase/',
-            'User-Agent': kDefaultUserAgent,
-          },
-        );
-        return resp.body;
-      });
-
-      _colleges = _parseOptions(body, 'xsh');
-      _grades = _parseGradeOptions(body, 'nj');
-
+      // 学院和年级来自同一个页面，并行获取
+      final results = await Future.wait([
+        _zhjwApi.fetchColleges(),
+        _zhjwApi.fetchGrades(),
+      ]);
+      _colleges = results[0] as List<College>;
+      _grades = results[1] as List<Grade>;
       _collegesState = TrainProgramLoadState.loaded;
       _gradesState = TrainProgramLoadState.loaded;
+    } on UnauthenticatedException {
+      _collegesState = TrainProgramLoadState.error;
+      _gradesState = TrainProgramLoadState.error;
+      _collegesError = 'unauthenticated';
+      _gradesError = 'unauthenticated';
+    } on ServiceException catch (e) {
+      _collegesState = TrainProgramLoadState.error;
+      _gradesState = TrainProgramLoadState.error;
+      _collegesError = e.message;
+      _gradesError = e.message;
     } catch (e) {
       _collegesState = TrainProgramLoadState.error;
       _gradesState = TrainProgramLoadState.error;
@@ -111,50 +108,6 @@ class TrainProgramProvider extends ChangeNotifier {
     _safeNotify();
   }
 
-  List<College> _parseOptions(String html, String selectId) {
-    final selectRegex = RegExp(
-      '''<select[^>]*name="$selectId"[^>]*>([\\s\\S]*?)</select>''',
-    );
-    final match = selectRegex.firstMatch(html);
-    if (match == null) return [];
-
-    final optionsRegex = RegExp(
-      '''<option[^>]*value="([^"]*)"[^>]*>(.*?)</option>''',
-    );
-    final options = optionsRegex.allMatches(match.group(1)!);
-    return options
-        .where((m) => m.group(1)!.isNotEmpty)
-        .map(
-          (m) => College(
-            value: m.group(1)!,
-            name: m.group(2)!.replaceAll(RegExp(r'<[^>]+>'), '').trim(),
-          ),
-        )
-        .toList();
-  }
-
-  List<Grade> _parseGradeOptions(String html, String selectId) {
-    final selectRegex = RegExp(
-      '''<select[^>]*name="$selectId"[^>]*>([\\s\\S]*?)</select>''',
-    );
-    final match = selectRegex.firstMatch(html);
-    if (match == null) return [];
-
-    final optionsRegex = RegExp(
-      '''<option[^>]*value="([^"]*)"[^>]*>(.*?)</option>''',
-    );
-    final options = optionsRegex.allMatches(match.group(1)!);
-    return options
-        .where((m) => m.group(1)!.isNotEmpty)
-        .map(
-          (m) => Grade(
-            value: m.group(1)!,
-            label: m.group(2)!.replaceAll(RegExp(r'<[^>]+>'), '').trim(),
-          ),
-        )
-        .toList();
-  }
-
   Future<void> searchPrograms() async {
     if (_programsState == TrainProgramLoadState.loading) return;
     _programsState = TrainProgramLoadState.loading;
@@ -162,34 +115,17 @@ class TrainProgramProvider extends ChangeNotifier {
     _safeNotify();
 
     try {
-      final body = await _authProvider.service.request((client) async {
-        final resp = await client.post(
-          Uri.parse(
-            '$kZhjwBase/student/comprehensiveQuery/search/trainProgram/load',
-          ),
-          headers: {
-            'Accept': 'application/json, */*',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Referer':
-                '$kZhjwBase/student/comprehensiveQuery/search/trainProgram/index',
-            'User-Agent': kDefaultUserAgent,
-          },
-          body:
-              'famc=&jhmc=&nj=${_selectedGrade ?? ''}&xw=&xzlx=&xdlx=00001&xsh=${_selectedCollege ?? ''}&pageNum=1&pageSize=100',
-        );
-        return resp.body.trim();
-      });
-
-      if (body.startsWith('<')) {
-        throw ScuLoginException('登录已过期，请重新登录', sessionExpired: true);
-      }
-
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final records = json['data']['records'] as List<dynamic>? ?? [];
-      _programs = records
-          .map((e) => TrainProgram.fromJson(e as Map<String, dynamic>))
-          .toList();
+      _programs = await _zhjwApi.searchPrograms(
+        college: _selectedCollege,
+        grade: _selectedGrade,
+      );
       _programsState = TrainProgramLoadState.loaded;
+    } on UnauthenticatedException {
+      _programsState = TrainProgramLoadState.error;
+      _programsError = 'unauthenticated';
+    } on ServiceException catch (e) {
+      _programsState = TrainProgramLoadState.error;
+      _programsError = e.message;
     } catch (e) {
       _programsState = TrainProgramLoadState.error;
       _programsError = e.toString();
@@ -204,30 +140,14 @@ class TrainProgramProvider extends ChangeNotifier {
     _safeNotify();
 
     try {
-      final body = await _authProvider.service.request((client) async {
-        final resp = await client.post(
-          Uri.parse(
-            '$kZhjwBase/student/comprehensiveQuery/search/trainProgram/detail',
-          ),
-          headers: {
-            'Accept': 'application/json, */*',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Referer':
-                '$kZhjwBase/student/comprehensiveQuery/search/trainProgram/index',
-            'User-Agent': kDefaultUserAgent,
-          },
-          body: 'fajhh=$fajhh&lx=1',
-        );
-        return resp.body.trim();
-      });
-
-      if (body.startsWith('<')) {
-        throw ScuLoginException('登录已过期，请重新登录', sessionExpired: true);
-      }
-
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      _currentDetail = TrainProgramDetail.fromJson(json);
+      _currentDetail = await _zhjwApi.fetchProgramDetail(fajhh);
       _detailState = TrainProgramLoadState.loaded;
+    } on UnauthenticatedException {
+      _detailState = TrainProgramLoadState.error;
+      _detailError = 'unauthenticated';
+    } on ServiceException catch (e) {
+      _detailState = TrainProgramLoadState.error;
+      _detailError = e.message;
     } catch (e) {
       _detailState = TrainProgramLoadState.error;
       _detailError = e.toString();
@@ -248,27 +168,14 @@ class TrainProgramProvider extends ChangeNotifier {
     _safeNotify();
 
     try {
-      final body = await _authProvider.service.request((client) async {
-        final fullUrl = '$kZhjwBase$urlPath';
-        final resp = await client.get(
-          Uri.parse(fullUrl),
-          headers: {
-            'Accept': 'application/json, */*',
-            'Referer':
-                '$kZhjwBase/student/comprehensiveQuery/search/trainProgram/index',
-            'User-Agent': kDefaultUserAgent,
-          },
-        );
-        return resp.body.trim();
-      });
-
-      if (body.startsWith('<')) {
-        throw ScuLoginException('登录已过期，请重新登录', sessionExpired: true);
-      }
-
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      _currentCourseDetail = CourseDetail.fromJson(json);
+      _currentCourseDetail = await _zhjwApi.fetchCourseDetail(urlPath);
       _courseDetailState = TrainProgramLoadState.loaded;
+    } on UnauthenticatedException {
+      _courseDetailState = TrainProgramLoadState.error;
+      _courseDetailError = 'unauthenticated';
+    } on ServiceException catch (e) {
+      _courseDetailState = TrainProgramLoadState.error;
+      _courseDetailError = e.message;
     } catch (e) {
       _courseDetailState = TrainProgramLoadState.error;
       _courseDetailError = e.toString();

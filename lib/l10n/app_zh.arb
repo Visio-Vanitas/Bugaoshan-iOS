@@ -124,6 +124,8 @@
     "updateToLatest": "升级到最新版本",
     "updateToStable": "更新到最新稳定版",
     "updateToPreview": "更新到最新版（包括预览版）",
+    "usePreviewUpdateSource": "软件更新使用预览版源",
+    "usePreviewUpdateSourceHint": "仅影响首页和关于页面的自动检查；测试页面始终同时检查两个渠道。",
     "downloading": "正在下载",
     "updateFailed": "更新失败",
     "preReleaseWarning": "这是预发布版本，使用时请注意。",
@@ -164,7 +166,7 @@
     "sunday":"周日",
     "currentWeek":"第 {week} 周",
     "thisWeek":"本周",
-    "weekRange":"第 {start} - {end} 周",
+    "weekRange":"{start}-{end} 周",
     "@weekRange": {
         "placeholders": {
             "start": {"type": "int"},
@@ -176,6 +178,14 @@
     "oddWeek":"单周",
     "evenWeek":"双周",
     "section":"节",
+    "sectionRange": "第{start}-{end}节",
+    "@sectionRange": {
+        "description": "Section range display, e.g. '第1-2节'",
+        "placeholders": {
+            "start": {"type": "int"},
+            "end": {"type": "int"}
+        }
+    },
     "sectionCount":"每天节数",
     "timeSlot":"时间段",
     "startTime":"开始时间",
@@ -664,5 +674,43 @@
     "downloadedAttachmentsDesc": "管理已下载的通知附件",
     "jwcTabLabel": "教务处",
     "xgbTabLabel": "党委学工部",
-    "tuanweiTabLabel": "青春川大"
+    "tuanweiTabLabel": "青春川大",
+    "dateMonthDay": "{month}月{day}日",
+    "@dateMonthDay": {
+        "placeholders": {
+            "month": {"type": "int"},
+            "day": {"type": "int"}
+        }
+    },
+    "holidayLabel": "假",
+    "@holidayLabel": {
+        "description": "Short label for statutory holiday displayed in course grid date header"
+    },
+    "festivalLabel": "节",
+    "@festivalLabel": {
+        "description": "Short label for festival displayed in course grid date header"
+    },
+    "solarTermLabel": "气",
+    "@solarTermLabel": {
+        "description": "Short label for solar term displayed in course grid date header"
+    },
+    "holidayTypeLabel": "节假日",
+    "@holidayTypeLabel": {
+        "description": "Label for statutory holiday type shown in special day detail sheet"
+    },
+    "festivalTypeLabel": "节日",
+    "@festivalTypeLabel": {
+        "description": "Label for festival type shown in special day detail sheet"
+    },
+    "solarTermTypeLabel": "节气",
+    "@solarTermTypeLabel": {
+        "description": "Label for solar term type shown in special day detail sheet"
+    },
+    "holidayTotalDays": "共{days}天假",
+    "@holidayTotalDays": {
+        "description": "Shows total holiday days, e.g. '共3天假'",
+        "placeholders": {
+            "days": {"type": "int"}
+        }
+    }
 }

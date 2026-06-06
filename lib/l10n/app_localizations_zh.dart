@@ -321,6 +321,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get updateToPreview => '更新到最新版（包括预览版）';
 
   @override
+  String get usePreviewUpdateSource => '软件更新使用预览版源';
+
+  @override
+  String get usePreviewUpdateSourceHint => '仅影响首页和关于页面的自动检查；测试页面始终同时检查两个渠道。';
+
+  @override
   String get downloading => '正在下载';
 
   @override
@@ -441,7 +447,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String weekRange(int start, int end) {
-    return '第 $start - $end 周';
+    return '$start-$end 周';
   }
 
   @override
@@ -458,6 +464,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get section => '节';
+
+  @override
+  String sectionRange(int start, int end) {
+    return '第$start-$end节';
+  }
 
   @override
   String get sectionCount => '每天节数';
@@ -1808,6 +1819,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tuanweiTabLabel => '青春川大';
+
+  @override
+  String dateMonthDay(int month, int day) {
+    return '$month月$day日';
+  }
+
+  @override
+  String get holidayLabel => '假';
+
+  @override
+  String get festivalLabel => '节';
+
+  @override
+  String get solarTermLabel => '气';
+
+  @override
+  String get holidayTypeLabel => '节假日';
+
+  @override
+  String get festivalTypeLabel => '节日';
+
+  @override
+  String get solarTermTypeLabel => '节气';
+
+  @override
+  String holidayTotalDays(int days) {
+    return '共$days天假';
+  }
 }
 
 /// The translations for Chinese, as used in China, using the Han script (`zh_Hans_CN`).

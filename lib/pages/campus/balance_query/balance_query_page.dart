@@ -3,7 +3,7 @@ import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/balance_query_provider.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/balance_query_service.dart';
+import 'package:bugaoshan/services/api/balance_query_service.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
 import 'package:bugaoshan/widgets/common/error_widgets.dart';
@@ -25,7 +25,7 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
   @override
   void initState() {
     super.initState();
-    _provider = BalanceQueryProvider(getIt());
+    _provider = getIt<BalanceQueryProvider>();
     _provider.addListener(_onProviderChanged);
     getIt<ScuAuthProvider>().addListener(_onAuthChanged);
     _initProvider();
@@ -90,7 +90,6 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
   void dispose() {
     _provider.removeListener(_onProviderChanged);
     getIt<ScuAuthProvider>().removeListener(_onAuthChanged);
-    _provider.dispose();
     super.dispose();
   }
 

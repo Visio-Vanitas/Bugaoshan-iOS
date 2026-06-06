@@ -3,6 +3,7 @@ import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/models/course.dart';
 import 'package:bugaoshan/providers/app_config_provider.dart';
+import 'package:bugaoshan/utils/holiday_utils.dart';
 import 'package:bugaoshan/widgets/course/course_card.dart';
 
 List<Course> selectVisibleCoursesForDay(
@@ -66,6 +67,7 @@ class CourseGrid extends StatefulWidget {
   final void Function(Course course)? onCourseTap;
   final void Function(Course course)? onCourseLongPress;
   final void Function(int dayOfWeek, int section)? onEmptyTap;
+  final void Function(DateTime date, SpecialDayInfo info)? onSpecialDayTap;
 
   const CourseGrid({
     super.key,
@@ -76,6 +78,7 @@ class CourseGrid extends StatefulWidget {
     this.onCourseTap,
     this.onCourseLongPress,
     this.onEmptyTap,
+    this.onSpecialDayTap,
   });
 
   @override
@@ -135,7 +138,7 @@ class _CourseGridState extends State<CourseGrid> {
       builder: (context, _) {
         return Column(
           children: [
-            _buildHeaderRow(context, dayNames),
+            _buildHeaderRow(context, dayNames, l10n),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -176,7 +179,11 @@ class _CourseGridState extends State<CourseGrid> {
     );
   }
 
-  Widget _buildHeaderRow(BuildContext context, List<String> dayNames) {
+  Widget _buildHeaderRow(
+    BuildContext context,
+    List<String> dayNames,
+    AppLocalizations l10n,
+  ) {
     final theme = Theme.of(context);
     final visibleDays = widget.config.showWeekend
         ? dayNames
@@ -226,49 +233,99 @@ class _CourseGridState extends State<CourseGrid> {
                   ),
                 );
                 final isToday = date.isAtSameMomentAs(today);
+                final specialDay = HolidayUtils.getSpecialDay(date);
+                final isHoliday = specialDay.type == SpecialDayType.holiday;
+                final isFestival = specialDay.type == SpecialDayType.festival;
+                final isSolarTerm = specialDay.type == SpecialDayType.solarTerm;
+                final isSpecial = isHoliday || isFestival || isSolarTerm;
 
                 return Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isToday
-                          ? theme.colorScheme.primaryContainer.withAlpha(180)
-                          : null,
-                      border: Border(
-                        right: BorderSide(
-                          color: theme.colorScheme.outlineVariant,
-                          width: 0.5,
+                  child: GestureDetector(
+                    onTap: isSpecial && widget.onSpecialDayTap != null
+                        ? () => widget.onSpecialDayTap!(date, specialDay)
+                        : null,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isHoliday
+                            ? Colors.red.withAlpha(15)
+                            : isFestival
+                            ? Colors.orange.withAlpha(15)
+                            : isSolarTerm
+                            ? Colors.green.withAlpha(15)
+                            : isToday
+                            ? theme.colorScheme.primaryContainer.withAlpha(180)
+                            : null,
+                        border: Border(
+                          right: BorderSide(
+                            color: theme.colorScheme.outlineVariant,
+                            width: 0.5,
+                          ),
                         ),
                       ),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isToday
-                                  ? FontWeight.bold
-                                  : FontWeight.w600,
-                              color: isToday
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurface,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isToday
+                                    ? FontWeight.bold
+                                    : FontWeight.w600,
+                                color: isToday
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${date.month}-${date.day}',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isToday
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: isToday
-                                  ? theme.colorScheme.primary.withAlpha(200)
-                                  : theme.colorScheme.onSurfaceVariant,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  l10n.dateMonthDay(date.month, date.day),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: isToday
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isHoliday
+                                        ? Colors.red
+                                        : isFestival
+                                        ? Colors.orange
+                                        : isSolarTerm
+                                        ? Colors.green
+                                        : isToday
+                                        ? theme.colorScheme.primary.withAlpha(
+                                            200,
+                                          )
+                                        : theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                if (isHoliday) ...[
+                                  const SizedBox(width: 2),
+                                  _buildLabelBadge(
+                                    l10n.holidayLabel,
+                                    Colors.red,
+                                  ),
+                                ],
+                                if (isFestival) ...[
+                                  const SizedBox(width: 2),
+                                  _buildLabelBadge(
+                                    l10n.festivalLabel,
+                                    Colors.orange,
+                                  ),
+                                ],
+                                if (isSolarTerm) ...[
+                                  const SizedBox(width: 2),
+                                  _buildLabelBadge(
+                                    l10n.solarTermLabel,
+                                    Colors.green,
+                                  ),
+                                ],
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -277,6 +334,24 @@ class _CourseGridState extends State<CourseGrid> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLabelBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
     );
   }

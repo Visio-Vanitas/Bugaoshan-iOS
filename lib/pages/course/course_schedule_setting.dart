@@ -6,7 +6,8 @@ import 'package:bugaoshan/models/course.dart';
 import 'package:bugaoshan/pages/course/time_slot_setting_page.dart';
 import 'package:bugaoshan/providers/course_provider.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
-import 'package:bugaoshan/services/scu_api_service.dart';
+import 'package:bugaoshan/services/api/zhjw_api_service.dart';
+import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 import 'package:bugaoshan/widgets/common/styled_card.dart';
 
 class CourseScheduleSetting extends StatefulWidget {
@@ -62,7 +63,7 @@ class _CourseScheduleSettingState extends State<CourseScheduleSetting> {
     if (!authProvider.isLoggedIn) return;
     setState(() => _fetchingCurrentWeek = true);
     try {
-      final week = await authProvider.service.fetchCurrentWeek();
+      final week = await getIt<ZhjwApiService>().fetchCurrentWeek();
       if (!mounted) return;
       // 根据获取到的周数反推学期开始日期（教务系统以周日为每周第一天）
       final now = DateTime.now();
@@ -75,7 +76,7 @@ class _CourseScheduleSettingState extends State<CourseScheduleSetting> {
         _startDate = newStartDate;
       });
       _save();
-    } on ScuLoginException catch (e) {
+    } on ScuException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,

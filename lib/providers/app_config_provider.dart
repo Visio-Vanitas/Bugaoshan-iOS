@@ -23,6 +23,7 @@ const String _keyVisibleDockIds = 'visibleDockIds';
 const String _keyAcceptedEulaVersion = 'acceptedEulaVersion';
 const String _keyThemeColorMode = 'themeColorMode';
 const String _keyWidgetShowTomorrow = 'widget_show_tomorrow';
+const String _keyUsePreviewUpdateSource = 'usePreviewUpdateSource';
 const Curve appCurve = Curves.easeOutQuart;
 
 enum ThemeColorMode { system, backgroundImage, custom }
@@ -63,6 +64,7 @@ class AppConfigProvider {
   final ValueNotifier<ThemeColorMode> themeColorMode =
       ValueNotifier<ThemeColorMode>(ThemeColorMode.system);
   final ValueNotifier<bool> widgetShowTomorrow = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> usePreviewUpdateSource = ValueNotifier<bool>(false);
 
   Future<void> _loadPreferences() async {
     final localeString = _sharedPreferences.getString(_keyLocale);
@@ -104,6 +106,8 @@ class AppConfigProvider {
         : ThemeColorMode.custom;
     widgetShowTomorrow.value =
         _sharedPreferences.getBool(_keyWidgetShowTomorrow) ?? false;
+    usePreviewUpdateSource.value =
+        _sharedPreferences.getBool(_keyUsePreviewUpdateSource) ?? false;
   }
 
   void _addSaveCallback() {
@@ -187,6 +191,12 @@ class AppConfigProvider {
       _sharedPreferences.setBool(
         _keyWidgetShowTomorrow,
         widgetShowTomorrow.value,
+      );
+    });
+    usePreviewUpdateSource.addListener(() {
+      _sharedPreferences.setBool(
+        _keyUsePreviewUpdateSource,
+        usePreviewUpdateSource.value,
       );
     });
   }

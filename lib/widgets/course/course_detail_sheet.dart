@@ -145,7 +145,7 @@ class CourseDetailSheet extends StatelessWidget {
                     icon: Icons.access_time_outlined,
                     iconColor: Colors.orange,
                     text:
-                        '第 ${course.startSection} - ${course.endSection} ${l10n.section}   $timeRange',
+                        '${l10n.sectionRange(course.startSection, course.endSection)}   $timeRange',
                   ),
                   if (course.teacher.isNotEmpty)
                     _InfoItem(
