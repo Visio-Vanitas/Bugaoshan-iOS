@@ -139,9 +139,9 @@ void _configureAsyncDependencies() {
     return CcylProvider(getIt<CcylAuth>(), getIt<CcylApiService>());
   });
   getIt.registerSingletonAsync<UserInfoProvider>(() async {
-    await getIt.isReady<WfwAuth>();
+    await getIt.isReady<ScuAuth>();
     await getIt.isReady<WfwApiService>();
-    return UserInfoProvider(getIt<WfwAuth>(), getIt<WfwApiService>());
+    return UserInfoProvider(getIt<ScuAuth>(), getIt<WfwApiService>());
   });
   getIt.registerSingletonAsync<GradesProvider>(() async {
     await getIt.isReady<SharedPreferences>();

@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
 import 'package:bugaoshan/services/api/wfw_api_service.dart';
-import 'package:bugaoshan/services/auth/wfw_auth.dart';
+import 'package:bugaoshan/services/auth/auth_state.dart';
+import 'package:bugaoshan/services/auth/scu_auth.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 
 const _keyUserRealname = 'scu_user_realname';
@@ -11,15 +12,15 @@ const _keyUserNumber = 'scu_user_number';
 
 /// 用户信息 Provider（单例）
 ///
-/// 响应式链：ScuAuth → WfwAuth (L2) → UserInfoProvider
-/// - WfwAuth 状态变化时自动获取用户信息标签和用户基本信息
-/// - 登出时自动清空
+/// 监听 [ScuAuth] 状态变化：
+/// - 登录成功（ready）→ 自动获取用户信息标签和用户基本信息
+/// - 登出（unknown）→ 自动清空
 class UserInfoProvider extends ChangeNotifier {
-  final WfwAuth _wfwAuth;
+  final ScuAuth _scuAuth;
   final WfwApiService _wfwApi;
 
-  UserInfoProvider(this._wfwAuth, this._wfwApi) {
-    _wfwAuth.addListener(_onAuthChanged);
+  UserInfoProvider(this._scuAuth, this._wfwApi) {
+    _scuAuth.addListener(_onAuthChanged);
   }
 
   List<Map<String, dynamic>>? _labels;
@@ -37,10 +38,9 @@ class UserInfoProvider extends ChangeNotifier {
   String? get userNumber => _userNumber;
 
   void _onAuthChanged() {
-    if (_wfwAuth.isReady) {
+    if (_scuAuth.state == AuthState.ready) {
       _fetchAll();
-    } else if (!_wfwAuth.isReady && !_wfwAuth.isExpired) {
-      // unknown 状态（logout）
+    } else if (_scuAuth.state == AuthState.unknown) {
       clear();
     }
   }
@@ -85,7 +85,7 @@ class UserInfoProvider extends ChangeNotifier {
 
   Future<void> fetchLabels() async {
     if (_loading) return;
-    if (!_wfwAuth.isReady) return;
+    if (!_scuAuth.isReady) return;
 
     _loading = true;
     _error = false;
@@ -119,7 +119,7 @@ class UserInfoProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _wfwAuth.removeListener(_onAuthChanged);
+    _scuAuth.removeListener(_onAuthChanged);
     super.dispose();
   }
 }
