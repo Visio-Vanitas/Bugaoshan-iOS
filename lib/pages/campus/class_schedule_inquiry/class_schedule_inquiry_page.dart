@@ -27,7 +27,8 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
   bool _hasMore = true;
   int _pageNum = 1;
   static const int _pageSize = 30;
-  int _requestSeq = 0;
+  int _subjectReqSeq = 0;
+  int _classOptionReqSeq = 0;
   String? _error;
 
   // 筛选选项
@@ -93,7 +94,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
   }
 
   Future<void> _loadSubjects(String departmentNum) async {
-    final seq = ++_requestSeq;
+    final seq = ++_subjectReqSeq;
     if (departmentNum.isEmpty) {
       setState(() {
         _subjects = [];
@@ -103,7 +104,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
     }
     try {
       final subjects = await _zhjwApi.fetchSubjectsByDepartment(departmentNum);
-      if (!mounted || seq != _requestSeq) return;
+      if (!mounted || seq != _subjectReqSeq) return;
       setState(() {
         _subjects = subjects;
         _selectedSubject = '';
@@ -114,7 +115,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
   }
 
   Future<void> _loadClassOptions() async {
-    final seq = ++_requestSeq;
+    final seq = ++_classOptionReqSeq;
     if (_selectedGrade.isEmpty || _selectedDepartment.isEmpty) {
       setState(() {
         _classOptions = [];
@@ -128,7 +129,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
         departmentNum: _selectedDepartment,
         subjectNum: _selectedSubject,
       );
-      if (!mounted || seq != _requestSeq) return;
+      if (!mounted || seq != _classOptionReqSeq) return;
       setState(() {
         _classOptions = options;
         _selectedClass = '';
