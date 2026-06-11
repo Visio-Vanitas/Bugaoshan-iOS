@@ -1117,6 +1117,18 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get otherSection;
 
+  /// No description provided for @settingsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsGeneral;
+
+  /// No description provided for @settingsDanger.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Zone'**
+  String get settingsDanger;
+
   /// No description provided for @colorOpacity.
   ///
   /// In en, this message translates to:

@@ -211,6 +211,8 @@
     "courseGridSection":"Course Grid",
     "courseStyleSetting":"Course Style",
     "otherSection":"Other",
+    "settingsGeneral":"General",
+    "settingsDanger":"Danger Zone",
     "colorOpacity":"Color Opacity",
     "fontSize":"Font Size",
     "showCourseGrid":"Show Course Grid",

@@ -551,6 +551,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otherSection => 'Other';
 
   @override
+  String get settingsGeneral => 'General';
+
+  @override
+  String get settingsDanger => 'Danger Zone';
+
+  @override
   String get colorOpacity => 'Color Opacity';
 
   @override

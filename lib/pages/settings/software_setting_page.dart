@@ -30,7 +30,7 @@ class SoftwareSettingPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // General settings card
+          _SectionTitle(title: localizations.settingsGeneral),
           InfoCard(
             children: [
               IconTile(
@@ -67,8 +67,8 @@ class SoftwareSettingPage extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
-          // Danger zone card
+          const SizedBox(height: 14),
+          _SectionTitle(title: localizations.settingsDanger),
           InfoCard(
             children: [
               IconTile(
@@ -94,6 +94,24 @@ class SoftwareSettingPage extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 10, 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }

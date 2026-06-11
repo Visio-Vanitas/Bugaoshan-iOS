@@ -535,6 +535,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get otherSection => '其他';
 
   @override
+  String get settingsGeneral => '通用';
+
+  @override
+  String get settingsDanger => '危险操作';
+
+  @override
   String get colorOpacity => '颜色不透明度';
 
   @override
