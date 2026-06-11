@@ -9,6 +9,8 @@ import 'package:bugaoshan/utils/open_link.dart'
 import 'package:bugaoshan/pages/about/release_notes_page.dart';
 import 'package:bugaoshan/pages/settings/eula_status_page.dart';
 import 'package:bugaoshan/pages/test/test_page.dart';
+import 'package:bugaoshan/widgets/common/info_card.dart';
+import 'package:bugaoshan/widgets/common/styled_tile.dart';
 import 'package:bugaoshan/widgets/dialog/dialog.dart';
 import 'package:bugaoshan/widgets/route/router_utils.dart';
 
@@ -201,7 +203,6 @@ class _AboutPageState extends State<AboutPage> {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final surfaceColor = theme.colorScheme.surface;
     final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
 
     return Scaffold(
@@ -251,135 +252,79 @@ class _AboutPageState extends State<AboutPage> {
           const SizedBox(height: 32),
 
           // Project info card
-          Container(
-            decoration: BoxDecoration(
-              color: surfaceColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: theme.dividerColor.withValues(alpha: 0.08),
+          InfoCard(
+            children: [
+              IconTile(
+                icon: Icons.apps_rounded,
+                label: localizations.appName,
+                value: localizations.bugaoshan,
               ),
-            ),
-            child: Column(
-              children: [
-                _InfoTile(
-                  icon: Icons.apps_rounded,
-                  label: localizations.appName,
-                  value: localizations.bugaoshan,
+              IconTile(
+                icon: Icons.info_outline_rounded,
+                label: localizations.version,
+                value: versionProvider.currentVersion,
+              ),
+              if (versionProvider.gitTag != 'null')
+                IconTile(
+                  icon: Icons.local_offer_outlined,
+                  label: localizations.gitTag,
+                  value: versionProvider.gitTag,
                 ),
-                Divider(
-                  height: 1,
-                  indent: 56,
-                  color: theme.dividerColor.withValues(alpha: 0.08),
-                ),
-                _InfoTile(
-                  icon: Icons.info_outline_rounded,
-                  label: localizations.version,
-                  value: versionProvider.currentVersion,
-                ),
-                if (versionProvider.gitTag != 'null') ...[
-                  Divider(
-                    height: 1,
-                    indent: 56,
-                    color: theme.dividerColor.withValues(alpha: 0.08),
-                  ),
-                  _InfoTile(
-                    icon: Icons.local_offer_outlined,
-                    label: localizations.gitTag,
-                    value: versionProvider.gitTag,
-                  ),
-                ],
-              ],
-            ),
+            ],
           ),
           const SizedBox(height: 12),
 
           // Links card
-          Container(
-            decoration: BoxDecoration(
-              color: surfaceColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: theme.dividerColor.withValues(alpha: 0.08),
+          InfoCard(
+            children: [
+              LinkTile(
+                icon: Icons.code_rounded,
+                label: localizations.projectRepository,
+                onTap: () => openProjectRepository(),
               ),
-            ),
-            child: Column(
-              children: [
-                _InfoTile(
-                  icon: Icons.code_rounded,
-                  label: localizations.projectRepository,
-                  value: 'GitHub',
-                  isLink: true,
-                  onTap: () => openProjectRepository(),
+              LinkTile(
+                icon: Icons.group_outlined,
+                label: localizations.developmentTeam,
+                onTap: () => openDeveloperTeam(),
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: appConfig.hasUpdateNotification,
+                builder: (context, hasUpdate, _) {
+                  return BadgedTile(
+                    icon: Icons.update_rounded,
+                    label: localizations.checkForUpdates,
+                    showBadge: hasUpdate,
+                    onTap: _checkForUpdates,
+                    trailing: _isCheckingUpdate
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : null,
+                  );
+                },
+              ),
+              IconTile(
+                icon: Icons.gavel,
+                label: localizations.eulaTitle,
+                onTap: () => popupOrNavigate(context, const EulaStatusPage()),
+              ),
+              IconTile(
+                icon: Icons.description_outlined,
+                label: localizations.openSourceLicenses,
+                onTap: () => showLicensePage(
+                  context: context,
+                  applicationName: localizations.bugaoshan,
+                  applicationVersion: versionProvider.currentVersion,
                 ),
-                Divider(
-                  height: 1,
-                  indent: 56,
-                  color: theme.dividerColor.withValues(alpha: 0.08),
-                ),
-                _InfoTile(
-                  icon: Icons.group_outlined,
-                  label: localizations.developmentTeam,
-                  value: 'The Brotherhood of SCU',
-                  isLink: true,
-                  onTap: () => openDeveloperTeam(),
-                ),
-                Divider(
-                  height: 1,
-                  indent: 56,
-                  color: theme.dividerColor.withValues(alpha: 0.08),
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: appConfig.hasUpdateNotification,
-                  builder: (context, hasUpdate, _) {
-                    return _InfoTile(
-                      icon: Icons.update_rounded,
-                      label: localizations.checkForUpdates,
-                      value: '',
-                      loading: _isCheckingUpdate,
-                      showBadge: hasUpdate,
-                      onTap: _checkForUpdates,
-                    );
-                  },
-                ),
-                Divider(
-                  height: 1,
-                  indent: 56,
-                  color: theme.dividerColor.withValues(alpha: 0.08),
-                ),
-                _InfoTile(
-                  icon: Icons.gavel,
-                  label: localizations.eulaTitle,
-                  value: '',
-                  onTap: () => popupOrNavigate(context, const EulaStatusPage()),
-                ),
-                Divider(
-                  height: 1,
-                  indent: 56,
-                  color: theme.dividerColor.withValues(alpha: 0.08),
-                ),
-                _InfoTile(
-                  icon: Icons.description_outlined,
-                  label: localizations.openSourceLicenses,
-                  value: '',
-                  onTap: () => showLicensePage(
-                    context: context,
-                    applicationName: localizations.bugaoshan,
-                    applicationVersion: versionProvider.currentVersion,
-                  ),
-                ),
-                Divider(
-                  height: 1,
-                  indent: 56,
-                  color: theme.dividerColor.withValues(alpha: 0.08),
-                ),
-                _InfoTile(
-                  icon: Icons.bug_report_outlined,
-                  label: localizations.testPage,
-                  value: '',
-                  onTap: () => popupOrNavigate(context, const TestPage()),
-                ),
-              ],
-            ),
+              ),
+              IconTile(
+                icon: Icons.bug_report_outlined,
+                label: localizations.testPage,
+                onTap: () => popupOrNavigate(context, const TestPage()),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
 
@@ -406,116 +351,6 @@ class _AboutPageState extends State<AboutPage> {
         ],
       ),
     );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final VoidCallback? onTap;
-  final bool isLink;
-  final bool loading;
-  final bool showBadge;
-
-  const _InfoTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.onTap,
-    this.isLink = false,
-    this.loading = false,
-    this.showBadge = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-
-    final tile = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: primaryColor, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    label,
-                    style: theme.textTheme.bodyLarge,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (showBadge) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (value.isNotEmpty || onTap != null)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (value.isNotEmpty)
-                  Flexible(
-                    child: Text(
-                      value,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                if (loading) ...[
-                  const SizedBox(width: 4),
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ] else if (onTap != null) ...[
-                  const SizedBox(width: 8),
-                  Icon(
-                    isLink ? Icons.open_in_new : Icons.chevron_right_rounded,
-                    color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.4,
-                    ),
-                    size: isLink ? 18 : 20,
-                  ),
-                ],
-              ],
-            ),
-        ],
-      ),
-    );
-
-    if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: tile,
-      );
-    }
-    return tile;
   }
 }
 
