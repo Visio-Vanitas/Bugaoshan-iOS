@@ -8,6 +8,7 @@ import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 import 'package:bugaoshan/utils/week_parser.dart';
 import 'package:bugaoshan/widgets/course/course_grid.dart';
+import 'package:bugaoshan/widgets/course/course_detail_sheet.dart';
 
 /// 班级课表详情页 - 以课表网格展示班级课程
 class ClassScheduleInquiryDetailPage extends StatefulWidget {
@@ -148,6 +149,18 @@ class _ClassScheduleInquiryDetailPageState
           SizedBox(
             height: gridHeight,
             child: CourseGrid(
+              onCourseTap: (course) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  builder: (context) => CourseDetailSheet(course: course),
+                );
+              },
               courses: _courses.map(_toCourse).toList(),
               config: gridConfig,
               displayWeek: 1,

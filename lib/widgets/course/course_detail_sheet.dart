@@ -8,12 +8,12 @@ import 'package:bugaoshan/widgets/route/router_utils.dart';
 
 class CourseDetailSheet extends StatelessWidget {
   final Course course;
-  final CourseProvider courseProvider;
+  final CourseProvider? courseProvider;
 
   const CourseDetailSheet({
     super.key,
     required this.course,
-    required this.courseProvider,
+    this.courseProvider,
   });
 
   String _formatTimeOfDay(TimeOfDay time) {
@@ -23,7 +23,9 @@ class CourseDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final config = courseProvider.scheduleConfig.value;
+    final config =
+        courseProvider?.scheduleConfig.value ??
+        ScheduleConfig(semesterStartDate: DateTime(2025, 9, 1));
 
     String timeRange = '';
     if (course.startSection > 0 &&
@@ -57,70 +59,72 @@ class CourseDetailSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  IconButton(
-                    iconSize: 22,
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    style: IconButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: () async {
-                      final confirm = await showYesNoDialog(
-                        title: l10n.deleteCourse,
-                        content: l10n.deleteCourseConfirm,
-                      );
-                      if (confirm == true) {
-                        await courseProvider.deleteCourse(course.id);
-                        if (context.mounted) {
-                          Navigator.pop(context);
+                  if (courseProvider != null) ...[
+                    IconButton(
+                      iconSize: 22,
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      style: IconButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: () async {
+                        final confirm = await showYesNoDialog(
+                          title: l10n.deleteCourse,
+                          content: l10n.deleteCourseConfirm,
+                        );
+                        if (confirm == true) {
+                          await courseProvider?.deleteCourse(course.id);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
                         }
-                      }
-                    },
-                  ),
-                  IconButton(
-                    iconSize: 22,
-                    icon: Icon(
-                      Icons.copy,
-                      color: Theme.of(context).colorScheme.primary,
+                      },
                     ),
-                    style: IconButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    IconButton(
+                      iconSize: 22,
+                      icon: Icon(
+                        Icons.copy,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      style: IconButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: () {
+                        final rootCtx = logicRootContext;
+                        Navigator.pop(context);
+                        final newCourse = course.copyWith();
+                        newCourse.name = '${course.name}${l10n.copySuffix}';
+                        if (rootCtx.mounted) {
+                          popupOrNavigate(
+                            rootCtx,
+                            CourseEditPage(course: newCourse),
+                          );
+                        }
+                      },
                     ),
-                    onPressed: () {
-                      final rootCtx = logicRootContext;
-                      Navigator.pop(context);
-                      final newCourse = course.copyWith();
-                      newCourse.name = '${course.name}${l10n.copySuffix}';
-                      if (rootCtx.mounted) {
-                        popupOrNavigate(
-                          rootCtx,
-                          CourseEditPage(course: newCourse),
-                        );
-                      }
-                    },
-                  ),
-                  IconButton(
-                    iconSize: 22,
-                    icon: Icon(
-                      Icons.edit_outlined,
-                      color: Theme.of(context).colorScheme.primary,
+                    IconButton(
+                      iconSize: 22,
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      style: IconButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: () {
+                        final rootCtx = logicRootContext;
+                        Navigator.pop(context);
+                        if (rootCtx.mounted) {
+                          popupOrNavigate(
+                            rootCtx,
+                            CourseEditPage(course: course),
+                          );
+                        }
+                      },
                     ),
-                    style: IconButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: () {
-                      final rootCtx = logicRootContext;
-                      Navigator.pop(context);
-                      if (rootCtx.mounted) {
-                        popupOrNavigate(
-                          rootCtx,
-                          CourseEditPage(course: course),
-                        );
-                      }
-                    },
-                  ),
+                  ],
                 ],
               ),
             ),
