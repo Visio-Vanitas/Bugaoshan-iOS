@@ -64,6 +64,7 @@ class CourseGrid extends StatefulWidget {
   final ScheduleConfig config;
   final int displayWeek;
   final int totalWeeks;
+  final bool showAllWeeks;
   final void Function(Course course)? onCourseTap;
   final void Function(Course course)? onCourseLongPress;
   final void Function(int dayOfWeek, int section)? onEmptyTap;
@@ -74,7 +75,8 @@ class CourseGrid extends StatefulWidget {
     required this.courses,
     required this.config,
     required this.displayWeek,
-    required this.totalWeeks,
+    this.totalWeeks = 20,
+    this.showAllWeeks = false,
     this.onCourseTap,
     this.onCourseLongPress,
     this.onEmptyTap,
@@ -152,14 +154,23 @@ class _CourseGridState extends State<CourseGrid> {
                           final day = widget.config.showWeekend
                               ? (dayIndex == 0 ? 7 : dayIndex)
                               : dayIndex + 1;
-                          final dayCourses = selectVisibleCoursesForDay(
-                            widget.courses
+                          List<Course> dayCourses;
+                          if (widget.showAllWeeks) {
+                            dayCourses = widget.courses
                                 .where((c) => c.dayOfWeek == day)
-                                .toList(),
-                            widget.displayWeek,
-                            showNonCurrentWeekCourses:
-                                widget.config.showNonCurrentWeekCourses,
-                          );
+                                .toList();
+                            dayCourses.sort(_compareCoursesForLayout);
+                            dayCourses = _mergeSameSlotCourses(dayCourses);
+                          } else {
+                            dayCourses = selectVisibleCoursesForDay(
+                              widget.courses
+                                  .where((c) => c.dayOfWeek == day)
+                                  .toList(),
+                              widget.displayWeek,
+                              showNonCurrentWeekCourses:
+                                  widget.config.showNonCurrentWeekCourses,
+                            );
+                          }
                           return _buildDayColumn(
                             context,
                             day,
@@ -232,16 +243,28 @@ class _CourseGridState extends State<CourseGrid> {
                         daysFromMonday,
                   ),
                 );
-                final isToday = date.isAtSameMomentAs(today);
-                final specialDay = HolidayUtils.getSpecialDay(date);
-                final isHoliday = specialDay.type == SpecialDayType.holiday;
-                final isFestival = specialDay.type == SpecialDayType.festival;
-                final isSolarTerm = specialDay.type == SpecialDayType.solarTerm;
+                final isToday =
+                    !widget.showAllWeeks && date.isAtSameMomentAs(today);
+                final specialDay = !widget.showAllWeeks
+                    ? HolidayUtils.getSpecialDay(date)
+                    : SpecialDayInfo(type: SpecialDayType.ordinary);
+                final isHoliday =
+                    !widget.showAllWeeks &&
+                    specialDay.type == SpecialDayType.holiday;
+                final isFestival =
+                    !widget.showAllWeeks &&
+                    specialDay.type == SpecialDayType.festival;
+                final isSolarTerm =
+                    !widget.showAllWeeks &&
+                    specialDay.type == SpecialDayType.solarTerm;
                 final isSpecial = isHoliday || isFestival || isSolarTerm;
 
                 return Expanded(
                   child: GestureDetector(
-                    onTap: isSpecial && widget.onSpecialDayTap != null
+                    onTap:
+                        !widget.showAllWeeks &&
+                            isSpecial &&
+                            widget.onSpecialDayTap != null
                         ? () => widget.onSpecialDayTap!(date, specialDay)
                         : null,
                     child: Container(
@@ -278,52 +301,53 @@ class _CourseGridState extends State<CourseGrid> {
                                     : theme.colorScheme.onSurface,
                               ),
                             ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  l10n.dateMonthDay(date.month, date.day),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: isToday
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: isHoliday
-                                        ? Colors.red
-                                        : isFestival
-                                        ? Colors.orange
-                                        : isSolarTerm
-                                        ? Colors.green
-                                        : isToday
-                                        ? theme.colorScheme.primary.withAlpha(
-                                            200,
-                                          )
-                                        : theme.colorScheme.onSurfaceVariant,
+                            if (!widget.showAllWeeks)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    l10n.dateMonthDay(date.month, date.day),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: isToday
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: isHoliday
+                                          ? Colors.red
+                                          : isFestival
+                                          ? Colors.orange
+                                          : isSolarTerm
+                                          ? Colors.green
+                                          : isToday
+                                          ? theme.colorScheme.primary.withAlpha(
+                                              200,
+                                            )
+                                          : theme.colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
-                                ),
-                                if (isHoliday) ...[
-                                  const SizedBox(width: 2),
-                                  _buildLabelBadge(
-                                    l10n.holidayLabel,
-                                    Colors.red,
-                                  ),
+                                  if (isHoliday) ...[
+                                    const SizedBox(width: 2),
+                                    _buildLabelBadge(
+                                      l10n.holidayLabel,
+                                      Colors.red,
+                                    ),
+                                  ],
+                                  if (isFestival) ...[
+                                    const SizedBox(width: 2),
+                                    _buildLabelBadge(
+                                      l10n.festivalLabel,
+                                      Colors.orange,
+                                    ),
+                                  ],
+                                  if (isSolarTerm) ...[
+                                    const SizedBox(width: 2),
+                                    _buildLabelBadge(
+                                      l10n.solarTermLabel,
+                                      Colors.green,
+                                    ),
+                                  ],
                                 ],
-                                if (isFestival) ...[
-                                  const SizedBox(width: 2),
-                                  _buildLabelBadge(
-                                    l10n.festivalLabel,
-                                    Colors.orange,
-                                  ),
-                                ],
-                                if (isSolarTerm) ...[
-                                  const SizedBox(width: 2),
-                                  _buildLabelBadge(
-                                    l10n.solarTermLabel,
-                                    Colors.green,
-                                  ),
-                                ],
-                              ],
-                            ),
+                              ),
                           ],
                         ),
                       ),
@@ -453,115 +477,276 @@ class _CourseGridState extends State<CourseGrid> {
     final afternoonEnd =
         widget.config.morningSections + widget.config.afternoonSections;
 
+    // Compute track assignments for all-weeks overlay mode
+    final trackInfos = widget.showAllWeeks && dayCourses.length > 1
+        ? _assignCourseTracks(dayCourses)
+        : null;
+
     return Expanded(
       child: SizedBox(
         height: rowHeight * sections,
-        child: Stack(
-          children: [
-            // Grid lines (conditionally rendered)
-            if (appConfig.showCourseGrid.value)
-              ...List.generate(sections, (i) {
-                final isBoundary =
-                    (i + 1 == morningEnd) || (i + 1 == afternoonEnd);
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final columnWidth = constraints.maxWidth;
+            return Stack(
+              children: [
+                // Grid lines (conditionally rendered)
+                if (appConfig.showCourseGrid.value)
+                  ...List.generate(sections, (i) {
+                    final isBoundary =
+                        (i + 1 == morningEnd) || (i + 1 == afternoonEnd);
 
-                return Positioned(
-                  top: i * rowHeight,
-                  left: 0,
-                  right: 0,
-                  height: rowHeight,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: isBoundary
-                              ? theme.colorScheme.primary.withAlpha(150)
-                              : theme.colorScheme.outlineVariant,
-                          width: isBoundary ? 1.5 : 0.5,
-                        ),
-                        right: BorderSide(
-                          color: theme.colorScheme.outlineVariant,
-                          width: 0.5,
+                    return Positioned(
+                      top: i * rowHeight,
+                      left: 0,
+                      right: 0,
+                      height: rowHeight,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: isBoundary
+                                  ? theme.colorScheme.primary.withAlpha(150)
+                                  : theme.colorScheme.outlineVariant,
+                              width: isBoundary ? 1.5 : 0.5,
+                            ),
+                            right: BorderSide(
+                              color: theme.colorScheme.outlineVariant,
+                              width: 0.5,
+                            ),
+                          ),
                         ),
                       ),
+                    );
+                  }),
+                // Course cards
+                ...dayCourses.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final course = entry.value;
+                  final top = (course.startSection - 1) * rowHeight;
+                  final courseHeight =
+                      (course.endSection - course.startSection + 1) *
+                          rowHeight -
+                      2;
+
+                  final cardWidget = SizedBox(
+                    child: CourseCard(
+                      course: course,
+                      config: widget.config,
+                      displayWeek: widget.displayWeek,
+                      showAllWeeks: widget.showAllWeeks,
+                      onTap: widget.onCourseTap != null
+                          ? () => widget.onCourseTap!(course)
+                          : null,
+                      onLongPress: widget.onCourseLongPress != null
+                          ? () => widget.onCourseLongPress!(course)
+                          : null,
                     ),
-                  ),
-                );
-              }),
-            // Course cards
-            ...dayCourses.map((course) {
-              final top = (course.startSection - 1) * rowHeight;
-              final courseHeight =
-                  (course.endSection - course.startSection + 1) * rowHeight - 2;
-              return Positioned(
-                top: top + 1,
-                left: 1,
-                right: 1,
-                height: courseHeight,
-                child: SizedBox(
-                  child: CourseCard(
-                    course: course,
-                    config: widget.config,
-                    displayWeek: widget.displayWeek,
-                    onTap: widget.onCourseTap != null
-                        ? () => widget.onCourseTap!(course)
-                        : null,
-                    onLongPress: widget.onCourseLongPress != null
-                        ? () => widget.onCourseLongPress!(course)
-                        : null,
-                  ),
-                ),
-              );
-            }),
-            // Invisible tap targets for empty cells, and Add icon for selected empty cell
-            ...List.generate(sections, (i) {
-              final section = i + 1;
-              // Skip sections that are covered by a course card
-              final hasCourse = dayCourses.any(
-                (c) => section >= c.startSection && section <= c.endSection,
-              );
-              if (hasCourse) return const SizedBox.shrink();
+                  );
 
-              final isSelected =
-                  _selectedEmptyDay == day && _selectedEmptySection == section;
+                  if (widget.showAllWeeks && trackInfos != null) {
+                    final info = trackInfos[index];
+                    final trackWidth = columnWidth / info.totalTracks;
+                    return Positioned(
+                      top: top + 1,
+                      left: info.track * trackWidth + 1,
+                      width: trackWidth - 2,
+                      height: courseHeight,
+                      child: cardWidget,
+                    );
+                  }
 
-              return Positioned(
-                top: i * rowHeight,
-                left: 0,
-                right: 0,
-                height: rowHeight,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: widget.onEmptyTap != null
-                      ? () => _handleEmptyTap(day, section)
-                      : null,
-                  child: isSelected
-                      ? Container(
-                          margin: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withAlpha(
-                              100,
-                            ), // e.g. pinkish/primary with opacity
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: theme.colorScheme.primary.withAlpha(150),
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.add,
-                              color: theme.colorScheme.onPrimaryContainer,
-                              size: 32,
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              );
-            }),
-          ],
+                  return Positioned(
+                    top: top + 1,
+                    left: 1,
+                    right: 1,
+                    height: courseHeight,
+                    child: cardWidget,
+                  );
+                }),
+                // Invisible tap targets for empty cells, and Add icon for selected empty cell
+                if (!widget.showAllWeeks)
+                  ...List.generate(sections, (i) {
+                    final section = i + 1;
+                    // Skip sections that are covered by a course card
+                    final hasCourse = dayCourses.any(
+                      (c) =>
+                          section >= c.startSection && section <= c.endSection,
+                    );
+                    if (hasCourse) return const SizedBox.shrink();
+
+                    final isSelected =
+                        _selectedEmptyDay == day &&
+                        _selectedEmptySection == section;
+
+                    return Positioned(
+                      top: i * rowHeight,
+                      left: 0,
+                      right: 0,
+                      height: rowHeight,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: widget.onEmptyTap != null
+                            ? () => _handleEmptyTap(day, section)
+                            : null,
+                        child: isSelected
+                            ? Container(
+                                margin: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primary.withAlpha(
+                                    100,
+                                  ), // e.g. pinkish/primary with opacity
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: theme.colorScheme.primary.withAlpha(
+                                      150,
+                                    ),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.add,
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                    size: 32,
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    );
+                  }),
+              ],
+            );
+          },
         ),
       ),
     );
   }
+}
+
+/// Track assignment info for side-by-side course layout in all-weeks mode.
+class _TrackInfo {
+  final int track;
+  final int totalTracks;
+  const _TrackInfo({required this.track, required this.totalTracks});
+}
+
+/// Assigns overlapping courses to vertical tracks for side-by-side layout.
+List<_TrackInfo> _assignCourseTracks(List<Course> courses) {
+  if (courses.isEmpty) return [];
+  if (courses.length == 1) {
+    return [const _TrackInfo(track: 0, totalTracks: 1)];
+  }
+
+  // Sort by start section, then longer courses first for stability
+  final indexed = courses.asMap().entries.toList()
+    ..sort((a, b) {
+      final cmp = a.value.startSection.compareTo(b.value.startSection);
+      if (cmp != 0) return cmp;
+      final aDuration = a.value.endSection - a.value.startSection;
+      final bDuration = b.value.endSection - b.value.startSection;
+      return bDuration.compareTo(aDuration);
+    });
+
+  final trackEnds = <int>[];
+  final assignments = List<int>.filled(courses.length, -1);
+
+  for (final entry in indexed) {
+    final originalIndex = entry.key;
+    final course = entry.value;
+
+    int assignedTrack = -1;
+    for (int t = 0; t < trackEnds.length; t++) {
+      if (trackEnds[t] < course.startSection) {
+        assignedTrack = t;
+        break;
+      }
+    }
+    if (assignedTrack == -1) {
+      assignedTrack = trackEnds.length;
+      trackEnds.add(0);
+    }
+    trackEnds[assignedTrack] = course.endSection;
+    assignments[originalIndex] = assignedTrack;
+  }
+
+  // Remap: for each course, recompute track/totalTracks based only on
+  // courses that actually overlap at its time slot (not global maximum).
+  return List.generate(courses.length, (i) {
+    final course = courses[i];
+    final overlapping = <int>[];
+    for (int j = 0; j < courses.length; j++) {
+      if (_coursesOverlapInSections(courses[j], course)) {
+        overlapping.add(j);
+      }
+    }
+    overlapping.sort((a, b) => assignments[a].compareTo(assignments[b]));
+    final localTrack = overlapping.indexOf(i);
+    return _TrackInfo(track: localTrack, totalTracks: overlapping.length);
+  });
+}
+
+/// Merges courses with the same name, day, and section range into one card.
+/// Reduces track count and shows combined info in compact format.
+List<Course> _mergeSameSlotCourses(List<Course> courses) {
+  if (courses.length <= 1) return courses;
+
+  final groups = <String, List<Course>>{};
+  for (final course in courses) {
+    final key =
+        '${course.name}|${course.dayOfWeek}|${course.startSection}|${course.endSection}';
+    groups.putIfAbsent(key, () => []).add(course);
+  }
+
+  if (groups.length == courses.length) return courses;
+
+  final result = <Course>[];
+  for (final group in groups.values) {
+    if (group.length == 1) {
+      result.add(group[0]);
+    } else {
+      // Only merge if same location; different locations → keep side-by-side tracks
+      final uniqueLocations = group.map((c) => c.location).toSet();
+      if (uniqueLocations.length == 1) {
+        result.add(_mergeCourseGroup(group));
+      } else {
+        result.addAll(group);
+      }
+    }
+  }
+  return result;
+}
+
+Course _mergeCourseGroup(List<Course> group) {
+  final first = group.first;
+
+  // Teacher: unique names (some fields already contain comma-separated names)
+  final teacher = group
+      .expand((c) => c.teacher.split(RegExp(r'[,，、]')))
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toSet()
+      .join('\u3001');
+
+  // Location: unique values, no week annotations
+  final location = group.map((c) => c.location).toSet().join(' \u00b7 ');
+
+  final minWeek = group.map((c) => c.startWeek).reduce((a, b) => a < b ? a : b);
+  final maxWeek = group.map((c) => c.endWeek).reduce((a, b) => a > b ? a : b);
+
+  return Course(
+    name: first.name,
+    teacher: teacher,
+    location: location,
+    startWeek: minWeek,
+    endWeek: maxWeek,
+    dayOfWeek: first.dayOfWeek,
+    startSection: first.startSection,
+    endSection: first.endSection,
+    colorValue: first.colorValue,
+    weekType: group.map((c) => c.weekType).toSet().length == 1
+        ? first.weekType
+        : WeekType.every,
+  );
 }

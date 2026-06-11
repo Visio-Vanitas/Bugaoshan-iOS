@@ -8,6 +8,7 @@ class CourseCard extends StatelessWidget {
   final Course course;
   final ScheduleConfig config;
   final int displayWeek;
+  final bool showAllWeeks;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
@@ -16,6 +17,7 @@ class CourseCard extends StatelessWidget {
     required this.course,
     required this.config,
     required this.displayWeek,
+    this.showAllWeeks = false,
     this.onTap,
     this.onLongPress,
   });
@@ -31,7 +33,7 @@ class CourseCard extends StatelessWidget {
         appConfig.courseCardFontSize,
       ]),
       builder: (context, _) {
-        final isActive = course.isActiveInWeek(displayWeek);
+        final isActive = showAllWeeks || course.isActiveInWeek(displayWeek);
         final color = isActive
             ? course.color.withValues(alpha: appConfig.colorOpacity.value)
             : _greyscale(course.color).withValues(alpha: 0.12);
@@ -42,16 +44,22 @@ class CourseCard extends StatelessWidget {
             : Colors.white;
         final fontSize = appConfig.courseCardFontSize.value;
         final smallFontSize = fontSize - 1;
-        final details = <({String text, int preferredMaxLines})>[
-          if (config.showLocation && course.location.isNotEmpty)
-            (text: course.location, preferredMaxLines: 2),
-          if (config.showTeacherName && course.teacher.isNotEmpty)
-            (text: course.teacher, preferredMaxLines: 1),
-          (
-            text: l10n.weekRange(course.startWeek, course.endWeek),
-            preferredMaxLines: 2,
-          ),
-        ];
+        final details =
+            <({String text, int preferredMaxLines, int renderMaxLines})>[
+              if (config.showLocation && course.location.isNotEmpty)
+                (
+                  text: course.location,
+                  preferredMaxLines: 2,
+                  renderMaxLines: 2,
+                ),
+              if (config.showTeacherName && course.teacher.isNotEmpty)
+                (text: course.teacher, preferredMaxLines: 2, renderMaxLines: 2),
+              (
+                text: l10n.weekRange(course.startWeek, course.endWeek),
+                preferredMaxLines: 1,
+                renderMaxLines: 4,
+              ),
+            ];
 
         return GestureDetector(
           onTap: onTap,
@@ -64,7 +72,10 @@ class CourseCard extends StatelessWidget {
                 < 100 => 3,
                 _ => 5,
               };
-              final visibleDetails = <({String text, int preferredMaxLines})>[];
+              final visibleDetails =
+                  <
+                    ({String text, int preferredMaxLines, int renderMaxLines})
+                  >[];
               var usedDetailLines = 0;
               for (final detail in details) {
                 final nextUsedLines =
@@ -91,34 +102,39 @@ class CourseCard extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.all(4),
                   child: SizedBox.expand(
-                    child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isActive
-                                ? course.name
-                                : '${l10n.notThisWeek} ${course.name}',
-                            maxLines: titleMaxLines,
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              color: textColor,
-                              height: 1.1,
-                              fontWeight: FontWeight.bold,
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(
+                        context,
+                      ).copyWith(scrollbars: false),
+                      child: SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isActive
+                                  ? course.name
+                                  : '${l10n.notThisWeek} ${course.name}',
+                              maxLines: titleMaxLines,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                color: textColor,
+                                height: 1.1,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          if (visibleDetails.isNotEmpty)
-                            const SizedBox(height: 2),
-                          ...visibleDetails.map(
-                            (detail) => _buildIconText(
-                              detail.text,
-                              smallFontSize,
-                              textColor,
-                              maxLines: detail.preferredMaxLines,
+                            if (visibleDetails.isNotEmpty)
+                              const SizedBox(height: 2),
+                            ...visibleDetails.map(
+                              (detail) => _buildIconText(
+                                detail.text,
+                                smallFontSize,
+                                textColor,
+                                maxLines: detail.renderMaxLines,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
