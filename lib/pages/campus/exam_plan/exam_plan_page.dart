@@ -148,70 +148,189 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
 
   Widget _buildExamCard(ExamInfo exam) {
     final colorScheme = Theme.of(context).colorScheme;
+    final primary = colorScheme.primary;
+
+    String dateLabel = exam.date;
+    String dateSub = exam.weekday;
+    final dm = RegExp(r'(\d{4})-(\d{2})-(\d{2})').firstMatch(exam.date);
+    if (dm != null) {
+      dateLabel = '${int.parse(dm.group(2)!)}月${int.parse(dm.group(3)!)}日';
+    }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      margin: const EdgeInsets.only(bottom: 14),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    exam.courseName,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+            // ── 左侧日期色块 ──
+            Container(
+              width: 72,
+              color: primary.withValues(alpha: 0.08),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    dateLabel,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: primary,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
                     ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    exam.week,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
+                  const SizedBox(height: 2),
+                  Text(
+                    dateSub,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: primary.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const Divider(height: 20),
-            _infoRow(Icons.calendar_today_outlined, exam.date),
-            _infoRow(Icons.today_outlined, exam.weekday),
-            _infoRow(Icons.access_time, exam.timeRange),
-            _infoRow(Icons.place_outlined, exam.location),
-            _infoRow(Icons.event_seat_outlined, exam.seatNumber),
-            if (exam.ticketNumber.isNotEmpty)
-              _infoRow(Icons.confirmation_number_outlined, exam.ticketNumber),
-            if (exam.tip != '无') _infoRow(Icons.info_outlined, exam.tip),
+            // ── 右侧信息区 ──
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 课程名 + 周次
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            exam.courseName,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.3,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            exam.week,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // 时间
+                    _infoChip(
+                      Icons.access_time_rounded,
+                      exam.timeRange,
+                      colorScheme,
+                    ),
+                    const SizedBox(height: 8),
+                    // 地点
+                    _infoChip(
+                      Icons.location_on_outlined,
+                      exam.location,
+                      colorScheme,
+                    ),
+                    const SizedBox(height: 8),
+                    // 座位号 + 准考证号 同行
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _infoChip(
+                            Icons.event_seat_outlined,
+                            exam.seatNumber,
+                            colorScheme,
+                          ),
+                        ),
+                        if (exam.ticketNumber.isNotEmpty)
+                          Expanded(
+                            child: _infoChip(
+                              Icons.confirmation_number_outlined,
+                              exam.ticketNumber,
+                              colorScheme,
+                            ),
+                          ),
+                      ],
+                    ),
+                    // 提示信息
+                    if (exam.tip != '无') ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              size: 14,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                exam.tip,
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _infoRow(IconData icon, String text) {
+  Widget _infoChip(IconData icon, String text, ColorScheme colorScheme) {
     return Padding(
-      padding: const EdgeInsets.only(top: 6),
+      padding: EdgeInsets.zero,
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
+          Icon(icon, size: 15, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: 6),
           Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
+                height: 1.3,
+              ),
+            ),
           ),
         ],
       ),
