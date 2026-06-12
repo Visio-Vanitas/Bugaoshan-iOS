@@ -76,9 +76,10 @@ const _textButtonTheme = TextButtonThemeData(
 );
 
 const _snackBarTheme = SnackBarThemeData(
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(AppShapes.medium)),
-  ),
+  //behavior: SnackBarBehavior.floating,
+  // shape: RoundedRectangleBorder(
+  //   borderRadius: BorderRadius.all(Radius.circular(AppShapes.medium)),
+  // ),
 );
 
 class MyApp extends StatefulWidget {
