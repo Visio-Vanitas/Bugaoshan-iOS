@@ -163,14 +163,7 @@ class _SetDockPageState extends State<SetDockPage> {
           child: ListTile(
             leading: Icon(item.icon, color: theme.colorScheme.primary),
             title: Text(item.dockFullLabel(l10n)),
-            subtitle: isProfile
-                ? Text(
-                    l10n.cannotDeleteProfile,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
-                  )
-                : null,
+            subtitle: null,
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -184,6 +177,7 @@ class _SetDockPageState extends State<SetDockPage> {
                 ReorderableDragStartListener(
                   index: index,
                   child: Icon(
+                    size: 40,
                     Icons.drag_handle,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
