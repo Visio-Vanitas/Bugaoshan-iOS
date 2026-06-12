@@ -1,3 +1,4 @@
+import 'package:bugaoshan/widgets/common/third_center.dart';
 import 'package:flutter/material.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
@@ -173,6 +174,28 @@ class ScheduleManagementPage extends StatelessWidget {
           builder: (context, _) {
             final allSchedules = courseProvider.allSchedules.value;
             final currentId = courseProvider.scheduleConfig.value.id;
+
+            if (allSchedules.isEmpty) {
+              return ThirdCenter(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_month_outlined,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.noSchedule,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
 
             return ListView.builder(
               itemCount: allSchedules.length,

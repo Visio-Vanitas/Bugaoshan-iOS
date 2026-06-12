@@ -6,6 +6,7 @@ import 'package:bugaoshan/pages/course/course_schedule_setting.dart';
 import 'package:bugaoshan/pages/course/schedule_management_page.dart';
 import 'package:bugaoshan/pages/settings/software_setting_page.dart';
 import 'package:bugaoshan/providers/app_config_provider.dart';
+import 'package:bugaoshan/providers/course_provider.dart';
 import 'package:bugaoshan/widgets/common/info_card.dart';
 import 'package:bugaoshan/widgets/common/styled_tile.dart';
 import 'package:bugaoshan/widgets/route/router_utils.dart';
@@ -16,6 +17,7 @@ class ProfileMenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final courseProvider = getIt<CourseProvider>();
 
     return InfoCard(
       children: [
@@ -24,10 +26,23 @@ class ProfileMenuCard extends StatelessWidget {
           label: localizations.scheduleManagement,
           onTap: () => popupOrNavigate(context, const ScheduleManagementPage()),
         ),
-        IconTile(
-          icon: Icons.schedule_rounded,
-          label: localizations.scheduleSetting,
-          onTap: () => popupOrNavigate(context, CourseScheduleSetting()),
+        ValueListenableBuilder(
+          valueListenable: courseProvider.allSchedules,
+          builder: (context, allSchedules, _) {
+            final hasSchedule = allSchedules.isNotEmpty;
+            final disabledColor = Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
+            return IconTile(
+              icon: Icons.schedule_rounded,
+              label: localizations.scheduleSetting,
+              iconColor: hasSchedule ? null : disabledColor,
+              labelColor: hasSchedule ? null : disabledColor,
+              onTap: hasSchedule
+                  ? () => popupOrNavigate(context, CourseScheduleSetting())
+                  : null,
+            );
+          },
         ),
         IconTile(
           icon: Icons.settings_rounded,
