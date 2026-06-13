@@ -1,3 +1,4 @@
+import 'package:bugaoshan/widgets/common/third_center.dart';
 import 'package:flutter/material.dart';
 import 'package:bugaoshan/utils/app_shapes.dart';
 
@@ -24,13 +25,12 @@ class CampusGridCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppShapes.large),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: ThirdCenter(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color:
                       iconContainerColor ??
