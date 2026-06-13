@@ -22,12 +22,26 @@ abstract class SsoRelayAuth extends ChangeNotifier implements SubsystemAuth {
   CookieClient? _lastScuClient;
   Future<CookieClient>? _loginFuture;
 
+  bool _isReady = false;
+
+  /// 子系统 session 是否已就绪（SSO 中继已完成）。
+  /// 页面应在 [isReady] 为 true 后才发起 API 请求，
+  /// 避免冷启动竞态导致的 session 失效报错。
+  bool get isReady => _isReady;
+
   SsoRelayAuth(
     this._scuAuth,
     this._ssoUrl, {
     List<SubsystemAuth> dependencies = const [],
   }) : _dependencies = List.unmodifiable(dependencies) {
-    _scuAuth.addListener(notifyListeners);
+    _scuAuth.addListener(_onScuAuthChanged);
+  }
+
+  void _onScuAuthChanged() {
+    if (!_scuAuth.isReady) {
+      _isReady = false;
+    }
+    notifyListeners();
   }
 
   @override
@@ -55,7 +69,12 @@ abstract class SsoRelayAuth extends ChangeNotifier implements SubsystemAuth {
 
     _loginFuture = _login(scuClient);
     try {
-      return await _loginFuture!;
+      final client = await _loginFuture!;
+      if (!_isReady) {
+        _isReady = true;
+        notifyListeners();
+      }
+      return client;
     } finally {
       _loginFuture = null;
     }
@@ -82,11 +101,12 @@ abstract class SsoRelayAuth extends ChangeNotifier implements SubsystemAuth {
     _cachedClient = null;
     _loginFuture = null;
     _lastScuClient = null;
+    _isReady = false;
   }
 
   @override
   void dispose() {
-    _scuAuth.removeListener(notifyListeners);
+    _scuAuth.removeListener(_onScuAuthChanged);
     super.dispose();
   }
 }

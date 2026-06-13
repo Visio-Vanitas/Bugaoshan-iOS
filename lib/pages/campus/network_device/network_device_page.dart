@@ -6,6 +6,7 @@ import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
 import 'package:bugaoshan/services/auth/scu_auth.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
+import 'package:bugaoshan/services/auth/wfw_auth.dart';
 import 'package:bugaoshan/utils/constants.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
@@ -32,12 +33,14 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
   void initState() {
     super.initState();
     getIt<ScuAuthProvider>().addListener(_onAuthChanged);
+    getIt<WfwAuth>().addListener(_onWfwAuthChanged);
     _loadData();
   }
 
   @override
   void dispose() {
     getIt<ScuAuthProvider>().removeListener(_onAuthChanged);
+    getIt<WfwAuth>().removeListener(_onWfwAuthChanged);
     super.dispose();
   }
 
@@ -50,11 +53,23 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
     }
   }
 
+  void _onWfwAuthChanged() {
+    if (getIt<WfwAuth>().isReady && mounted) {
+      _loadData();
+    }
+  }
+
   Future<void> _loadData() async {
     final auth = getIt<ScuAuthProvider>();
     if (!auth.isLoggedIn) {
       if (auth.isAutoLoggingIn) return;
       setState(() => _error = 'notLoggedIn');
+      return;
+    }
+
+    // 等待 WfwAuth 预热完成再请求数据，避免因 session 未就绪导致
+    // "用户信息已失效" 错误（尤其从 dock 栏冷启动时）
+    if (!getIt<WfwAuth>().isReady) {
       return;
     }
 
@@ -229,6 +244,11 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
     final auth = getIt<ScuAuthProvider>();
     if (!auth.isLoggedIn && auth.isAutoLoggingIn) {
       return const AutoLoginLoadingWidget();
+    }
+
+    // 已登录但 WfwAuth 尚未预热完成（冷启动 race），显示加载状态
+    if (auth.isLoggedIn && !getIt<WfwAuth>().isReady) {
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_loading) {

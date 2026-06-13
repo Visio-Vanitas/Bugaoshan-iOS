@@ -53,6 +53,7 @@ class _FitnessTestPageState extends State<FitnessTestPage>
       _selectedYear = savedYear;
     }
     getIt<ScuAuthProvider>().addListener(_onAuthChanged);
+    getIt<FitnessAuth>().addListener(_onFitnessAuthChanged);
     _loadData();
   }
 
@@ -60,6 +61,7 @@ class _FitnessTestPageState extends State<FitnessTestPage>
   void dispose() {
     _tabController.dispose();
     getIt<ScuAuthProvider>().removeListener(_onAuthChanged);
+    getIt<FitnessAuth>().removeListener(_onFitnessAuthChanged);
     super.dispose();
   }
 
@@ -85,6 +87,12 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     }
   }
 
+  void _onFitnessAuthChanged() {
+    if (getIt<FitnessAuth>().isReady && mounted) {
+      _loadData();
+    }
+  }
+
   /// 通过 FitnessAuth 发送带自动重试的请求。
   /// [fn] 接收已认证的 CookieClient 并返回响应数据。
   Future<T> _fitnessRequest<T>(
@@ -104,6 +112,11 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     if (!auth.isLoggedIn) {
       if (auth.isAutoLoggingIn) return;
       setState(() => _error = 'notLoggedIn');
+      return;
+    }
+
+    // 等待 FitnessAuth 预热完成，避免冷启动竞态
+    if (!getIt<FitnessAuth>().isReady) {
       return;
     }
 
@@ -270,6 +283,11 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     final auth = getIt<ScuAuthProvider>();
     if (!auth.isLoggedIn && auth.isAutoLoggingIn) {
       return const AutoLoginLoadingWidget();
+    }
+
+    // 已登录但 FitnessAuth 尚未预热完成（冷启动 race），显示加载状态
+    if (auth.isLoggedIn && !getIt<FitnessAuth>().isReady) {
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_loading) {

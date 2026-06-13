@@ -3,6 +3,7 @@ import 'package:bugaoshan/services/auth/auth_state.dart';
 import 'package:bugaoshan/services/auth/scu_auth.dart';
 import 'package:bugaoshan/services/auth/cookie_client.dart';
 import 'package:bugaoshan/services/auth/subsystem_auth.dart';
+import 'package:bugaoshan/utils/constants.dart';
 
 /// 微服务认证（第2层）
 ///
@@ -37,7 +38,19 @@ class WfwAuth extends ChangeNotifier implements SubsystemAuth {
 
   @override
   Future<void> ensureAuthenticated() async {
-    await getClient();
+    final client = await _scuAuth.getClient();
+    // 预热 wfw session：不带 AJAX header 访问 wfw 首页，触发 SSO
+    // 重定向链，在 CookieClient 中建立 wfw.scu.edu.cn 的 session cookie。
+    // 不这么做的话，冷启动时页面带 X-Requested-With 的 API 请求会被
+    // wfw 服务端直接返回 "用户信息已失效" 而不走 SSO 重定向。
+    try {
+      await client.get(
+        Uri.parse('https://wfw.scu.edu.cn/'),
+        headers: {'User-Agent': kDefaultUserAgent},
+      );
+    } catch (_) {
+      // 预热失败不阻塞，实际 API 调用可能仍能触发重定向
+    }
     if (!_ready) {
       _ready = true;
       notifyListeners();

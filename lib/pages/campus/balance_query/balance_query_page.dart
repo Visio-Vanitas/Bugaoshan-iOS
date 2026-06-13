@@ -4,6 +4,7 @@ import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/balance_query_provider.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
 import 'package:bugaoshan/services/api/balance_query_service.dart';
+import 'package:bugaoshan/services/auth/payapp_auth.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
 import 'package:bugaoshan/widgets/common/error_widgets.dart';
@@ -28,6 +29,7 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
     _provider = getIt<BalanceQueryProvider>();
     _provider.addListener(_onProviderChanged);
     getIt<ScuAuthProvider>().addListener(_onAuthChanged);
+    getIt<PayAppAuth>().addListener(_onPayAppAuthChanged);
     _initProvider();
   }
 
@@ -41,6 +43,12 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
       _initProvider();
     } else if (mounted) {
       setState(() {});
+    }
+  }
+
+  void _onPayAppAuthChanged() {
+    if (getIt<PayAppAuth>().isReady && mounted) {
+      _initProvider();
     }
   }
 
@@ -63,6 +71,12 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
       }
       return;
     }
+
+    // 等待 PayAppAuth 预热完成，避免冷启动竞态
+    if (!getIt<PayAppAuth>().isReady) {
+      return;
+    }
+
     try {
       await _provider.getCampusList();
       if (mounted) {
@@ -90,6 +104,7 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
   void dispose() {
     _provider.removeListener(_onProviderChanged);
     getIt<ScuAuthProvider>().removeListener(_onAuthChanged);
+    getIt<PayAppAuth>().removeListener(_onPayAppAuthChanged);
     super.dispose();
   }
 
@@ -192,8 +207,14 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
   }
 
   Widget _buildBody(AppLocalizations l10n) {
+    final auth = getIt<ScuAuthProvider>();
+
+    // 已登录但 PayAppAuth 尚未预热完成（冷启动 race），显示加载状态
+    if (auth.isLoggedIn && !getIt<PayAppAuth>().isReady) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     if (_isInitializing) {
-      final auth = getIt<ScuAuthProvider>();
       if (auth.isAutoLoggingIn) {
         return const AutoLoginLoadingWidget();
       }
