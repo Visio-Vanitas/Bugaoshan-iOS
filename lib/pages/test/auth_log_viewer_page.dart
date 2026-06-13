@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart' show ShareParams, SharePlus, XFile;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/pages/campus/downloads/file_utils.dart';
 import 'package:bugaoshan/utils/auth_logger.dart';
+import 'package:bugaoshan/utils/share_utils.dart';
 
 /// 全屏日志查看器（开发者调试用，文案不做 i18n）。
 ///
@@ -164,7 +164,7 @@ class _AuthLogViewerPageState extends State<AuthLogViewerPage> {
       final dir = await _authLogDir();
       final path = await _log.exportToFile(dir);
       try {
-        await SharePlus.instance.share(ShareParams(files: [XFile(path)]));
+        await shareSingleFile(path);
         messenger.showSnackBar(const SnackBar(content: Text('Saved')));
       } catch (e) {
         messenger.showSnackBar(SnackBar(content: Text('Save failed: $e')));
