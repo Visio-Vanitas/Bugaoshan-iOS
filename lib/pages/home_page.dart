@@ -242,6 +242,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             )
           : Icon(config.selectedIcon),
       label: config.dockLabel(l10n),
+      tooltip: '',
     );
   }
 
