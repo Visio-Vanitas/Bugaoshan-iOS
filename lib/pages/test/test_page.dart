@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
-import 'package:bugaoshan/pages/test/auth_log_card.dart';
+import 'package:bugaoshan/pages/test/auth_log/auth_log_card.dart';
 import 'package:bugaoshan/pages/test/environment_info_button.dart';
 import 'package:bugaoshan/pages/test/update_card.dart';
 import 'package:bugaoshan/pages/test/update_result_notifier.dart';

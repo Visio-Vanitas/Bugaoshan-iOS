@@ -6,12 +6,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/pages/campus/downloads/file_utils.dart';
+import 'package:bugaoshan/pages/test/auth_log/auth_log_filter_bar.dart';
+import 'package:bugaoshan/pages/test/auth_log/auth_log_tile.dart';
 import 'package:bugaoshan/utils/auth_logger.dart';
 import 'package:bugaoshan/utils/share_utils.dart';
 
 /// 全屏日志查看器（开发者调试用，文案不做 i18n）。
 ///
-/// - 顶栏：复制全部、保存分享、清空
+/// - 顶栏：复制全部、保存分享、打开文件夹、清空
 /// - 内容：level 多选过滤 chip + tag 下拉 + 反时序列表 + 按 level 着色
 class AuthLogViewerPage extends StatefulWidget {
   const AuthLogViewerPage({super.key});
@@ -73,7 +75,7 @@ class _AuthLogViewerPageState extends State<AuthLogViewerPage> {
       ),
       body: Column(
         children: [
-          _FilterBar(
+          AuthLogFilterBar(
             entries: _log.entries,
             levels: _filterLevels,
             tag: _filterTag,
@@ -114,7 +116,7 @@ class _AuthLogViewerPageState extends State<AuthLogViewerPage> {
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   itemCount: reversed.length,
                   separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, i) => _LogTile(entry: reversed[i]),
+                  itemBuilder: (context, i) => AuthLogTile(entry: reversed[i]),
                 );
               },
             ),
@@ -218,179 +220,5 @@ class _AuthLogViewerPageState extends State<AuthLogViewerPage> {
       ),
     );
     if (confirmed == true) _log.clear();
-  }
-}
-
-class _FilterBar extends StatelessWidget {
-  final List<AuthLogEntry> entries;
-  // null = 无筛选（全部 level 启用）；非空 = 仅显示这些 level。
-  final Set<AuthLogLevel>? levels;
-  final String? tag;
-  final void Function(AuthLogLevel level, bool selected) onLevelToggled;
-  final ValueChanged<String?> onTagChanged;
-
-  const _FilterBar({
-    required this.entries,
-    required this.levels,
-    required this.tag,
-    required this.onLevelToggled,
-    required this.onTagChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final tags = <String>{for (final e in entries) e.tag}.toList()..sort();
-    final selectedLevels = levels; // null = 全部
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final l in AuthLogLevel.values)
-                    _LevelChip(
-                      label: l.name.toUpperCase(),
-                      // null = 全部启用 ⇒ 全部勾上
-                      selected: selectedLevels == null
-                          ? true
-                          : selectedLevels.contains(l),
-                      onSelected: (sel) => onLevelToggled(l, sel),
-                      level: l,
-                    ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          DropdownButton<String?>(
-            value: tag,
-            hint: const Text('All tags'),
-            onChanged: onTagChanged,
-            items: <DropdownMenuItem<String?>>[
-              const DropdownMenuItem<String?>(
-                value: null,
-                child: Text('All tags'),
-              ),
-              for (final t in tags)
-                DropdownMenuItem<String?>(value: t, child: Text(t)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LevelChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final ValueChanged<bool> onSelected;
-  final AuthLogLevel level;
-
-  const _LevelChip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-    required this.level,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final Color bg = switch (level) {
-      AuthLogLevel.debug => scheme.surfaceContainerHighest,
-      AuthLogLevel.info => scheme.primaryContainer,
-      AuthLogLevel.warn => scheme.tertiaryContainer,
-      AuthLogLevel.error => scheme.errorContainer,
-    };
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: FilterChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: onSelected,
-        showCheckmark: true,
-        backgroundColor: bg,
-      ),
-    );
-  }
-}
-
-class _LogTile extends StatelessWidget {
-  final AuthLogEntry entry;
-  const _LogTile({required this.entry});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final (Color bg, Color fg) = switch (entry.level) {
-      AuthLogLevel.debug => (
-        scheme.surfaceContainerLow,
-        scheme.onSurfaceVariant,
-      ),
-      AuthLogLevel.info => (scheme.primaryContainer, scheme.onPrimaryContainer),
-      AuthLogLevel.warn => (
-        scheme.tertiaryContainer,
-        scheme.onTertiaryContainer,
-      ),
-      AuthLogLevel.error => (scheme.errorContainer, scheme.onErrorContainer),
-    };
-    return Container(
-      color: bg,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 86,
-            child: Text(
-              _formatTime(entry.timestamp),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-                color: fg,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 44,
-            child: Text(
-              entry.level.name.toUpperCase(),
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: fg, letterSpacing: 0.6),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.tag,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: fg),
-                ),
-                const SizedBox(height: 2),
-                SelectableText(
-                  entry.message,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: fg),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static String _two(int n) => n.toString().padLeft(2, '0');
-  static String _three(int n) => n.toString().padLeft(3, '0');
-  static String _formatTime(DateTime t) {
-    return '${_two(t.hour)}:${_two(t.minute)}:${_two(t.second)}.${_three(t.millisecond)}';
   }
 }

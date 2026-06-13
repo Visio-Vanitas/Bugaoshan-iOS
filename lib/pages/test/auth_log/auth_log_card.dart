@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
-import 'package:bugaoshan/pages/test/auth_log_viewer_page.dart';
+import 'package:bugaoshan/pages/test/auth_log/auth_log_viewer_page.dart';
 import 'package:bugaoshan/utils/auth_logger.dart';
 
 /// TestPage 中的「Auth Log」入口卡片：
