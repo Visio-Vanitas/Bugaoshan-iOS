@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 本项目版本号规则：
 添加功能一般升级第二个版本号，小修改或者紧急修复bug则升级第三个版本号。小更新自由发布预览版，版本号不变，git tag为 `v{LatestVersion}-{PreviewName}` ，如 1.0.0 版本的预览版为： `v1.0.0-preview`
 
-## [Unreleased]
+## [2.0.0] - 2026-06-14
 
 ### Added
 - 课表为空时显示空状态页面，提供「导入课表」「新建课表」等快捷入口
