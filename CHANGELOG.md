@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 本项目版本号规则：
 添加功能一般升级第二个版本号，小修改或者紧急修复bug则升级第三个版本号。小更新自由发布预览版，版本号不变，git tag为 `v{LatestVersion}-{PreviewName}` ，如 1.0.0 版本的预览版为： `v1.0.0-preview`
 
+## [2.0.1] - 2026-06-15
+
+### Fixed
+- 修复课表日期栏节假日标签在手机端与日期重叠的问题
+
 ## [2.0.0] - 2026-06-14
 
 ### Added
