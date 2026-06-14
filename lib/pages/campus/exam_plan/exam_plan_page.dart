@@ -141,7 +141,7 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppShapes.large),
         itemCount: _exams.length,
         itemBuilder: (context, index) => _buildExamCard(_exams[index]),
       ),

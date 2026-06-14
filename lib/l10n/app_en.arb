@@ -135,7 +135,7 @@
     "clearAllData": "Clear All Data",
     "confirmMessage":"Are you sure?",
     "environmentInfo":"Environment Info",
-    "testPage":"Test Page",
+    "devPage":"Developer Page",
     "forceUpdate":"Update to Latest (Include Preview)",
     "authLog":"Auth Log",
     "viewAuthLog":"View Auth Log",

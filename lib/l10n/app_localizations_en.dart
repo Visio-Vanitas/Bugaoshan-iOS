@@ -368,7 +368,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get environmentInfo => 'Environment Info';
 
   @override
-  String get testPage => 'Test Page';
+  String get devPage => 'Developer Page';
 
   @override
   String get forceUpdate => 'Update to Latest (Include Preview)';

@@ -6,8 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/pages/campus/downloads/file_utils.dart';
-import 'package:bugaoshan/pages/test/auth_log/auth_log_entry_tile.dart';
-import 'package:bugaoshan/pages/test/auth_log/auth_log_filter_bar.dart';
+import 'package:bugaoshan/pages/dev/auth_log/auth_log_entry_tile.dart';
+import 'package:bugaoshan/pages/dev/auth_log/auth_log_filter_bar.dart';
 import 'package:bugaoshan/utils/auth_logger.dart';
 import 'package:bugaoshan/utils/share_utils.dart';
 

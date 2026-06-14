@@ -769,11 +769,11 @@ abstract class AppLocalizations {
   /// **'Environment Info'**
   String get environmentInfo;
 
-  /// No description provided for @testPage.
+  /// No description provided for @devPage.
   ///
   /// In en, this message translates to:
-  /// **'Test Page'**
-  String get testPage;
+  /// **'Developer Page'**
+  String get devPage;
 
   /// No description provided for @forceUpdate.
   ///

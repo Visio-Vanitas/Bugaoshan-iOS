@@ -355,7 +355,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get environmentInfo => '环境信息';
 
   @override
-  String get testPage => '测试页面';
+  String get devPage => '开发者页面';
 
   @override
   String get forceUpdate => '更新到最新版本（含预览版）';

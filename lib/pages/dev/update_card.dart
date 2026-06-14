@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
-import 'package:bugaoshan/pages/test/update_result_notifier.dart';
+import 'package:bugaoshan/pages/dev/update_result_notifier.dart';
 import 'package:bugaoshan/providers/app_config_provider.dart';
 import 'package:bugaoshan/services/update_service.dart';
 

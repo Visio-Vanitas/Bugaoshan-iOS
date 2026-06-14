@@ -8,7 +8,7 @@ import 'package:bugaoshan/utils/app_shapes.dart';
 import 'package:bugaoshan/utils/open_link.dart'
     show openDeveloperTeam, openProjectRepository;
 import 'package:bugaoshan/pages/settings/eula_status_page.dart';
-import 'package:bugaoshan/pages/test/test_page.dart';
+import 'package:bugaoshan/pages/dev/dev_page.dart';
 import 'package:bugaoshan/widgets/common/info_card.dart';
 import 'package:bugaoshan/widgets/common/styled_tile.dart';
 import 'package:bugaoshan/widgets/dialog/dialog.dart';
@@ -222,8 +222,8 @@ class _AboutPageState extends State<AboutPage> {
               ),
               IconTile(
                 icon: Icons.bug_report_outlined,
-                label: localizations.testPage,
-                onTap: () => popupOrNavigate(context, const TestPage()),
+                label: localizations.devPage,
+                onTap: () => popupOrNavigate(context, const DevPage()),
               ),
             ],
           ),

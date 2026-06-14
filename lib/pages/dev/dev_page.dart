@@ -4,25 +4,25 @@ import 'package:flutter/material.dart';
 
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
-import 'package:bugaoshan/pages/test/auth_log/auth_log_tile.dart';
-import 'package:bugaoshan/pages/test/environment_info_tile.dart';
-import 'package:bugaoshan/pages/test/update_card.dart';
-import 'package:bugaoshan/pages/test/update_result_notifier.dart';
-import 'package:bugaoshan/pages/test/wizard_reset_tile.dart';
+import 'package:bugaoshan/pages/dev/auth_log/auth_log_tile.dart';
+import 'package:bugaoshan/pages/dev/environment_info_tile.dart';
+import 'package:bugaoshan/pages/dev/update_card.dart';
+import 'package:bugaoshan/pages/dev/update_result_notifier.dart';
+import 'package:bugaoshan/pages/dev/wizard_reset_tile.dart';
 import 'package:bugaoshan/providers/app_config_provider.dart';
 import 'package:bugaoshan/providers/app_info_provider.dart';
 import 'package:bugaoshan/services/update_service.dart';
 import 'package:bugaoshan/widgets/dialog/download_progress_dialog.dart';
 import 'package:bugaoshan/widgets/dialog/update_dialog.dart';
 
-class TestPage extends StatefulWidget {
-  const TestPage({super.key});
+class DevPage extends StatefulWidget {
+  const DevPage({super.key});
 
   @override
-  State<TestPage> createState() => _TestPageState();
+  State<DevPage> createState() => _DevPageState();
 }
 
-class _TestPageState extends State<TestPage> {
+class _DevPageState extends State<DevPage> {
   final _versionInfoProvider = getIt<AppInfoProvider>();
   final _appConfig = getIt<AppConfigProvider>();
   final _stableResult = UpdateResultNotifier();
@@ -83,7 +83,7 @@ class _TestPageState extends State<TestPage> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(localizations.testPage)),
+      appBar: AppBar(title: Text(localizations.devPage)),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

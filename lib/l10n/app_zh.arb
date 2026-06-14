@@ -131,7 +131,7 @@
     "clearAllData": "清除所有数据",
     "confirmMessage":"真的要这样做吗？",
     "environmentInfo":"环境信息",
-    "testPage":"测试页面",
+    "devPage":"开发者页面",
     "forceUpdate": "更新到最新版本（含预览版）",
     "authLog":"认证日志",
     "viewAuthLog":"查看认证日志",

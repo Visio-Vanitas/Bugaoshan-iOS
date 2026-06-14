@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:bugaoshan/l10n/app_localizations.dart';
-import 'package:bugaoshan/pages/test/environment_info_page.dart';
+import 'package:bugaoshan/pages/dev/environment_info_page.dart';
 import 'package:bugaoshan/widgets/route/router_utils.dart';
 
 /// TestPage 入口：环境信息。
