@@ -44,7 +44,7 @@ class CourseCard extends StatelessWidget {
             ? Colors.black87
             : Colors.white;
         final fontSize = appConfig.courseCardFontSize.value;
-        final smallFontSize = fontSize - 1;
+        final smallFontSize = (fontSize * 0.85).clamp(8.0, 16.0);
         final details =
             <({String text, int preferredMaxLines, int renderMaxLines})>[
               if (config.showLocation && course.location.isNotEmpty)
