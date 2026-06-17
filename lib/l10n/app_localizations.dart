@@ -436,14 +436,8 @@ abstract class AppLocalizations {
   /// No description provided for @campusNetworkRequiredAtNight.
   ///
   /// In en, this message translates to:
-  /// **'Access is restricted to campus network during 0:00-6:00. Please connect to campus Wi-Fi or use the school VPN.'**
+  /// **'Access is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.'**
   String get campusNetworkRequiredAtNight;
-
-  /// No description provided for @zhjwCampusNetworkRequiredAtNight.
-  ///
-  /// In en, this message translates to:
-  /// **'Access to the academic affairs system is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.'**
-  String get zhjwCampusNetworkRequiredAtNight;
 
   /// No description provided for @appOnly.
   ///
@@ -1812,12 +1806,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No grade data'**
   String get gradesNoData;
-
-  /// No description provided for @gradesLoadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load grades'**
-  String get gradesLoadFailed;
 
   /// No description provided for @gradesRefreshFailed.
   ///
@@ -3313,12 +3301,6 @@ abstract class AppLocalizations {
   /// **'Notice Detail'**
   String get fitnessTestNoticeDetail;
 
-  /// No description provided for @fitnessTestCampusNetworkRequiredAtNight.
-  ///
-  /// In en, this message translates to:
-  /// **'Access is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.'**
-  String get fitnessTestCampusNetworkRequiredAtNight;
-
   /// No description provided for @dockLabelFitnessTest.
   ///
   /// In en, this message translates to:
@@ -3876,12 +3858,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No exam schedule available'**
   String get examPlanNoData;
-
-  /// No description provided for @examPlanLoadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load exam schedule'**
-  String get examPlanLoadFailed;
 
   /// No description provided for @campusGridView.
   ///

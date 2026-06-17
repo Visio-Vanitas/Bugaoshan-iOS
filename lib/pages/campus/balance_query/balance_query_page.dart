@@ -7,7 +7,7 @@ import 'package:bugaoshan/services/api/balance_query_service.dart';
 import 'package:bugaoshan/services/auth/payapp_auth.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 import 'widgets/balance_list.dart';
 import 'widgets/bind_room_dialog.dart';
 
@@ -21,7 +21,7 @@ class BalanceQueryPage extends StatefulWidget {
 class _BalanceQueryPageState extends State<BalanceQueryPage> {
   late BalanceQueryProvider _provider;
   bool _isInitializing = true;
-  String? _initError;
+  LoadErrorType? _initError;
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
       if (mounted) {
         setState(() {
           _isInitializing = false;
-          _initError = 'notLoggedIn';
+          _initError = LoadErrorType.notLoggedIn;
         });
       }
       return;
@@ -82,11 +82,11 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
       if (mounted) {
         setState(() => _isInitializing = false);
       }
-    } on BalanceQueryAuthException catch (e) {
+    } on BalanceQueryAuthException {
       if (mounted) {
         setState(() {
           _isInitializing = false;
-          _initError = e.message;
+          _initError = LoadErrorType.sessionExpired;
         });
       }
     } catch (e) {
@@ -94,7 +94,7 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
       if (mounted) {
         setState(() {
           _isInitializing = false;
-          _initError = 'networkError';
+          _initError = LoadErrorType.networkError;
         });
       }
     }
@@ -222,11 +222,11 @@ class _BalanceQueryPageState extends State<BalanceQueryPage> {
     }
 
     if (_initError != null) {
-      if (_initError == 'notLoggedIn') {
+      if (_initError == LoadErrorType.notLoggedIn) {
         return const LoginRequiredWidget();
       }
       return RetryableErrorWidget(
-        message: l10n.loadFailed,
+        errorType: LoadErrorType.loadFailed,
         onRetry: _initProvider,
       );
     }

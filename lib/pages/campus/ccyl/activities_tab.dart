@@ -5,7 +5,7 @@ import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/ccyl_provider.dart';
 import 'package:bugaoshan/pages/campus/ccyl/models/ccyl_models.dart';
 import 'package:bugaoshan/pages/campus/ccyl/activity_lib_detail_page.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 class ActivitiesTab extends StatefulWidget {
   const ActivitiesTab({super.key});
@@ -19,7 +19,7 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
   final _scrollController = ScrollController();
   List<CyclActivity> _activities = [];
   bool _loading = false;
-  String? _error;
+  LoadErrorType? _error;
   int _pageNum = 1;
   bool _hasMore = true;
 
@@ -75,11 +75,8 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
     } catch (e) {
       debugPrint('Activities load error: $e');
       if (mounted) {
-        final hour = DateTime.now().hour;
         setState(() {
-          _error = (hour >= 0 && hour < 6)
-              ? 'campusNetworkRequiredAtNight'
-              : 'ccylActivityLoadFailed';
+          _error = campusNetworkErrorType(LoadErrorType.ccylActivityLoadFailed);
         });
       }
     } finally {
@@ -88,17 +85,6 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
           _loading = false;
         });
       }
-    }
-  }
-
-  String _getErrorMessage(AppLocalizations l10n, String errorKey) {
-    switch (errorKey) {
-      case 'ccylActivityLoadFailed':
-        return l10n.ccylActivityLoadFailed;
-      case 'campusNetworkRequiredAtNight':
-        return l10n.campusNetworkRequiredAtNight;
-      default:
-        return l10n.loadFailed;
     }
   }
 
@@ -136,7 +122,7 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
         Expanded(
           child: _error != null
               ? RetryableErrorWidget(
-                  message: _getErrorMessage(l10n, _error!),
+                  errorType: _error!,
                   onRetry: _loadActivities,
                 )
               : _activities.isEmpty && !_loading

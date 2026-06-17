@@ -75,8 +75,7 @@
     "loadFailed": "加载失败",
     "retry": "重试",
     "campusNetworkRequired": "该功能仅限校园网访问，请连接校园网或使用学校 VPN 后重试",
-    "campusNetworkRequiredAtNight": "该时段（0:00-6:00）仅限校园网访问，请连接校园网或使用学校 VPN 后重试",
-    "zhjwCampusNetworkRequiredAtNight": "该时段（23:00-次日6:00）教务系统仅限校园网访问，请连接校园网或使用学校 VPN 后重试",
+    "campusNetworkRequiredAtNight": "该时段（23:00-次日6:00）仅限校园网访问，请连接校园网或使用学校 VPN 后重试",
     "appOnly": "仅 App 端可使用",
     "softwareSetting": "软件设置",
     "followSystem": "跟随系统",
@@ -333,7 +332,6 @@
     "passingScores": "及格成绩",
     "gradesLoginRequired": "请先在「我的」页面完成统一身份认证登录",
     "gradesNoData": "暂无成绩数据",
-    "gradesLoadFailed": "成绩加载失败",
     "gradesRefreshFailed": "刷新失败，显示的是缓存数据",
     "gradesNoPassingData": "暂无及格成绩数据",
     "gradesSearchHint": "搜索课程名称",
@@ -607,7 +605,6 @@
     "fitnessTestReadCount": "次阅读",
     "fitnessTestSticky": "置顶",
     "fitnessTestNoticeDetail": "通知详情",
-    "fitnessTestCampusNetworkRequiredAtNight": "该时段（23:00-次日6:00）仅限校园网访问，请连接校园网或使用学校 VPN 后重试",
     "dockLabelFitnessTest": "体测",
     "dockLabelNotice": "通知",
     "dockLabelNoticeParty": "学工部",
@@ -754,7 +751,6 @@
     "examPlan": "考试安排",
     "examPlanDesc": "查询本学期考试时间、地点和座位号",
     "examPlanNoData": "暂无考试安排",
-    "examPlanLoadFailed": "考试安排加载失败",
     "campusGridView": "网格视图",
     "campusGridViewDesc": "校园页面使用网格布局"
 }

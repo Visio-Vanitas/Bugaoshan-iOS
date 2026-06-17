@@ -8,8 +8,7 @@ import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 class ExamPlanPage extends StatefulWidget {
   const ExamPlanPage({super.key});
@@ -21,7 +20,7 @@ class ExamPlanPage extends StatefulWidget {
 class _ExamPlanPageState extends State<ExamPlanPage> {
   List<ExamInfo> _exams = [];
   bool _loading = false;
-  String? _error;
+  LoadErrorType? _error;
 
   @override
   void initState() {
@@ -49,7 +48,7 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
     final auth = getIt<ScuAuthProvider>();
     if (!auth.isLoggedIn) {
       if (auth.isAutoLoggingIn) return;
-      setState(() => _error = 'notLoggedIn');
+      setState(() => _error = LoadErrorType.notLoggedIn);
       return;
     }
 
@@ -73,14 +72,14 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'notLoggedIn';
+          _error = LoadErrorType.notLoggedIn;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = campusNetworkErrorKey('loadFailed');
+          _error = campusNetworkErrorType(LoadErrorType.loadFailed);
         });
       }
     }
@@ -113,7 +112,7 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_error == 'notLoggedIn') {
+    if (_error == LoadErrorType.notLoggedIn) {
       if (getIt<ScuAuthProvider>().isAutoLoggingIn) {
         return const AutoLoginLoadingWidget();
       }
@@ -121,10 +120,7 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
     }
 
     if (_error != null) {
-      return RetryableErrorWidget(
-        message: _getErrorMessage(l10n, _error!),
-        onRetry: _loadData,
-      );
+      return RetryableErrorWidget(errorType: _error!, onRetry: _loadData);
     }
 
     if (_exams.isEmpty) {
@@ -146,15 +142,6 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
         itemBuilder: (context, index) => _buildExamCard(_exams[index]),
       ),
     );
-  }
-
-  String _getErrorMessage(AppLocalizations l10n, String errorKey) {
-    switch (errorKey) {
-      case 'zhjwCampusNetworkRequiredAtNight':
-        return l10n.zhjwCampusNetworkRequiredAtNight;
-      default:
-        return l10n.examPlanLoadFailed;
-    }
   }
 
   Widget _buildExamCard(ExamInfo exam) {

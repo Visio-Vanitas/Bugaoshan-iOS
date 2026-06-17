@@ -12,7 +12,7 @@ import 'package:bugaoshan/services/auth/cookie_client.dart';
 import 'package:bugaoshan/utils/constants.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 import 'package:bugaoshan/widgets/common/info_row.dart';
 
 class FitnessTestPage extends StatefulWidget {
@@ -31,7 +31,7 @@ class _FitnessTestPageState extends State<FitnessTestPage>
   late final TabController _tabController;
 
   bool _loading = false;
-  String? _error;
+  LoadErrorType? _error;
 
   // Notices
   List<Map<String, dynamic>> _notices = [];
@@ -40,7 +40,7 @@ class _FitnessTestPageState extends State<FitnessTestPage>
   int _selectedYear = DateTime.now().year;
   Map<String, dynamic>? _scoreData;
   bool _scoreLoading = false;
-  String? _scoreError;
+  Object? _scoreError;
   bool _privacyHidden = true;
 
   @override
@@ -63,19 +63,6 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     getIt<ScuAuthProvider>().removeListener(_onAuthChanged);
     getIt<FitnessAuth>().removeListener(_onFitnessAuthChanged);
     super.dispose();
-  }
-
-  String _getErrorMessage(AppLocalizations l10n, String errorKey) {
-    switch (errorKey) {
-      case 'networkError':
-        return l10n.networkError;
-      case 'campusNetworkRequiredAtNight':
-        return l10n.fitnessTestCampusNetworkRequiredAtNight;
-      case 'authFailed':
-        return l10n.loadFailed;
-      default:
-        return l10n.loadFailed;
-    }
   }
 
   void _onAuthChanged() {
@@ -111,7 +98,7 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     final auth = getIt<ScuAuthProvider>();
     if (!auth.isLoggedIn) {
       if (auth.isAutoLoggingIn) return;
-      setState(() => _error = 'notLoggedIn');
+      setState(() => _error = LoadErrorType.notLoggedIn);
       return;
     }
 
@@ -150,18 +137,15 @@ class _FitnessTestPageState extends State<FitnessTestPage>
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'notLoggedIn';
+          _error = LoadErrorType.notLoggedIn;
         });
       }
     } catch (e) {
       debugPrint('Fitness test load error: $e');
       if (mounted) {
-        final hour = DateTime.now().hour;
         setState(() {
           _loading = false;
-          _error = (hour >= 23 || hour < 6)
-              ? 'campusNetworkRequiredAtNight'
-              : 'networkError';
+          _error = campusNetworkErrorType(LoadErrorType.networkError);
         });
       }
     }
@@ -194,12 +178,9 @@ class _FitnessTestPageState extends State<FitnessTestPage>
       });
     } catch (e) {
       debugPrint('Fitness test score error: $e');
-      final hour = DateTime.now().hour;
       setState(() {
         _scoreLoading = false;
-        _scoreError = (hour >= 23 || hour < 6)
-            ? 'campusNetworkRequiredAtNight'
-            : 'networkError';
+        _scoreError = campusNetworkErrorType(LoadErrorType.networkError);
       });
     }
   }
@@ -295,16 +276,13 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     }
 
     if (_error != null) {
-      if (_error == 'notLoggedIn') {
+      if (_error == LoadErrorType.notLoggedIn) {
         if (getIt<ScuAuthProvider>().isAutoLoggingIn) {
           return const AutoLoginLoadingWidget();
         }
         return const LoginRequiredWidget();
       }
-      return RetryableErrorWidget(
-        message: _getErrorMessage(l10n, _error!),
-        onRetry: _loadData,
-      );
+      return RetryableErrorWidget(errorType: _error!, onRetry: _loadData);
     }
 
     return TabBarView(
@@ -575,10 +553,15 @@ class _FitnessTestPageState extends State<FitnessTestPage>
     if (_scoreError != null) {
       return Padding(
         padding: const EdgeInsets.all(32),
-        child: RetryableErrorWidget(
-          message: _getErrorMessage(l10n, _scoreError!),
-          onRetry: _retryScore,
-        ),
+        child: _scoreError is LoadErrorType
+            ? RetryableErrorWidget(
+                errorType: _scoreError as LoadErrorType,
+                onRetry: _retryScore,
+              )
+            : RetryableErrorWidget.message(
+                message: _scoreError as String,
+                onRetry: _retryScore,
+              ),
       );
     }
 

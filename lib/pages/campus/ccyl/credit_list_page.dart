@@ -4,7 +4,7 @@ import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/ccyl_provider.dart';
 import 'package:bugaoshan/pages/campus/ccyl/models/ccyl_models.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 class CreditListPage extends StatefulWidget {
   const CreditListPage({super.key});
@@ -17,7 +17,7 @@ class _CreditListPageState extends State<CreditListPage> {
   final _scrollController = ScrollController();
   List<CyclCredit> _credits = [];
   bool _loading = false;
-  String? _error;
+  LoadErrorType? _error;
   int _pageNum = 1;
   bool _hasMore = true;
 
@@ -75,11 +75,8 @@ class _CreditListPageState extends State<CreditListPage> {
     } catch (e) {
       debugPrint('Credit list load error: $e');
       if (mounted) {
-        final hour = DateTime.now().hour;
         setState(() {
-          _error = (hour >= 0 && hour < 6)
-              ? 'campusNetworkRequiredAtNight'
-              : 'ccylActivityLoadFailed';
+          _error = campusNetworkErrorType(LoadErrorType.ccylActivityLoadFailed);
         });
       }
     } finally {
@@ -188,17 +185,6 @@ class _CreditListPageState extends State<CreditListPage> {
     }
   }
 
-  String _getErrorMessage(AppLocalizations l10n, String errorKey) {
-    switch (errorKey) {
-      case 'ccylActivityLoadFailed':
-        return l10n.ccylActivityLoadFailed;
-      case 'campusNetworkRequiredAtNight':
-        return l10n.campusNetworkRequiredAtNight;
-      default:
-        return l10n.loadFailed;
-    }
-  }
-
   Map<String, double> _statsByType() {
     final stats = <String, double>{};
     for (final c in _credits) {
@@ -219,10 +205,7 @@ class _CreditListPageState extends State<CreditListPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return _error != null
-        ? RetryableErrorWidget(
-            message: _getErrorMessage(l10n, _error!),
-            onRetry: _loadCredits,
-          )
+        ? RetryableErrorWidget(errorType: _error!, onRetry: _loadCredits)
         : _credits.isEmpty && !_loading
         ? Center(child: Text(l10n.noData))
         : RefreshIndicator(

@@ -180,11 +180,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get campusNetworkRequiredAtNight =>
-      '该时段（0:00-6:00）仅限校园网访问，请连接校园网或使用学校 VPN 后重试';
-
-  @override
-  String get zhjwCampusNetworkRequiredAtNight =>
-      '该时段（23:00-次日6:00）教务系统仅限校园网访问，请连接校园网或使用学校 VPN 后重试';
+      '该时段（23:00-次日6:00）仅限校园网访问，请连接校园网或使用学校 VPN 后重试';
 
   @override
   String get appOnly => '仅 App 端可使用';
@@ -897,9 +893,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gradesNoData => '暂无成绩数据';
-
-  @override
-  String get gradesLoadFailed => '成绩加载失败';
 
   @override
   String get gradesRefreshFailed => '刷新失败，显示的是缓存数据';
@@ -1672,10 +1665,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fitnessTestNoticeDetail => '通知详情';
 
   @override
-  String get fitnessTestCampusNetworkRequiredAtNight =>
-      '该时段（23:00-次日6:00）仅限校园网访问，请连接校园网或使用学校 VPN 后重试';
-
-  @override
   String get dockLabelFitnessTest => '体测';
 
   @override
@@ -1966,9 +1955,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get examPlanNoData => '暂无考试安排';
-
-  @override
-  String get examPlanLoadFailed => '考试安排加载失败';
 
   @override
   String get campusGridView => '网格视图';

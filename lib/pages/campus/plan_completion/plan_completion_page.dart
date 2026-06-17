@@ -6,7 +6,7 @@ import 'package:bugaoshan/providers/plan_completion_provider.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 import 'package:bugaoshan/utils/app_shapes.dart';
 
 class PlanCompletionPage extends StatefulWidget {
@@ -34,7 +34,7 @@ class _PlanCompletionPageState extends State<PlanCompletionPage> {
   }
 
   void _onProviderUpdate() {
-    if (_provider.error == 'rateLimited' && mounted) {
+    if (_provider.error == LoadErrorType.rateLimited && mounted) {
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -89,31 +89,16 @@ class _PlanCompletionPageState extends State<PlanCompletionPage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return switch (_provider.state) {
       PlanCompletionLoadState.idle || PlanCompletionLoadState.loading =>
         const Center(child: CircularProgressIndicator()),
-      PlanCompletionLoadState.error => CampusNetworkRequiredWidget(
-        message: _getErrorMessage(l10n, _provider.error),
+      PlanCompletionLoadState.error => RetryableErrorWidget(
+        errorType: _provider.error!,
         onRetry: () => _provider.fetchPlanCompletion(),
         iconSize: 56,
       ),
       PlanCompletionLoadState.loaded => _buildTree(context),
     };
-  }
-
-  String _getErrorMessage(AppLocalizations l10n, String? errorKey) {
-    switch (errorKey) {
-      case 'rateLimited':
-        return l10n.planCompletionRateLimited;
-      case 'zhjwCampusNetworkRequiredAtNight':
-        return l10n.zhjwCampusNetworkRequiredAtNight;
-      case 'sessionExpired':
-        return l10n.sessionExpired;
-      default:
-        return l10n.loadFailed;
-    }
   }
 
   Widget _buildTree(BuildContext context) {

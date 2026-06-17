@@ -13,8 +13,7 @@ import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 enum _ViewMode { campus, building, room }
 
@@ -38,7 +37,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
   _ViewMode _viewMode = _ViewMode.campus;
   bool _isLoading = false;
   bool _isInitialLoad = true;
-  String? _error;
+  LoadErrorType? _error;
   DateTime _selectedDate = DateTime.now();
   bool _showCurrentFreeOnly = false;
 
@@ -80,7 +79,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
       if (auth.isAutoLoggingIn) return;
       if (!mounted) return;
       setState(() {
-        _error = 'notLoggedIn';
+        _error = LoadErrorType.notLoggedIn;
         _isLoading = false;
         _isInitialLoad = false;
       });
@@ -103,7 +102,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
     } on UnauthenticatedException catch (_) {
       if (!mounted) return;
       setState(() {
-        _error = 'sessionExpired';
+        _error = LoadErrorType.sessionExpired;
         _isLoading = false;
         _isInitialLoad = false;
       });
@@ -111,7 +110,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
       debugPrint('Classroom index load error: $e');
       if (!mounted) return;
       setState(() {
-        _error = campusNetworkErrorKey('loadFailed');
+        _error = campusNetworkErrorType(LoadErrorType.loadFailed);
         _isLoading = false;
         _isInitialLoad = false;
       });
@@ -123,7 +122,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
     if (!auth.isLoggedIn) {
       if (!mounted) return;
       setState(() {
-        _error = 'notLoggedIn';
+        _error = LoadErrorType.notLoggedIn;
         _isLoading = false;
       });
       return;
@@ -150,14 +149,14 @@ class _ClassroomPageState extends State<ClassroomPage> {
     } on UnauthenticatedException catch (_) {
       if (!mounted) return;
       setState(() {
-        _error = 'sessionExpired';
+        _error = LoadErrorType.sessionExpired;
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('Classroom query error: $e');
       if (!mounted) return;
       setState(() {
-        _error = campusNetworkErrorKey('loadFailed');
+        _error = campusNetworkErrorType(LoadErrorType.loadFailed);
         _isLoading = false;
       });
     }
@@ -611,16 +610,13 @@ class _ClassroomPageState extends State<ClassroomPage> {
   }
 
   Widget _buildErrorWidget(AppLocalizations l10n, VoidCallback onRetry) {
-    if (_error == 'notLoggedIn') {
+    if (_error == LoadErrorType.notLoggedIn) {
       if (getIt<ScuAuthProvider>().isAutoLoggingIn) {
         return const AutoLoginLoadingWidget();
       }
       return const LoginRequiredWidget();
     }
-    return RetryableErrorWidget(
-      message: getCampusNetworkErrorMessage(l10n, _error),
-      onRetry: onRetry,
-    );
+    return RetryableErrorWidget(errorType: _error!, onRetry: onRetry);
   }
 
   String _periodTooltip(

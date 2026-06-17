@@ -75,8 +75,7 @@
     "loadFailed": "Load Failed",
     "retry": "Retry",
     "campusNetworkRequired": "This feature is only available on campus network. Please connect to campus Wi-Fi or use the school VPN.",
-    "campusNetworkRequiredAtNight": "Access is restricted to campus network during 0:00-6:00. Please connect to campus Wi-Fi or use the school VPN.",
-  "zhjwCampusNetworkRequiredAtNight": "Access to the academic affairs system is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.",
+    "campusNetworkRequiredAtNight": "Access is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.",
     "appOnly": "Available on App only",
     "softwareSetting": "Software Setting",
     "followSystem": "Follow System",
@@ -337,7 +336,6 @@
     "passingScores": "Passing Scores",
     "gradesLoginRequired": "Please complete SCU Unified Identity login in the Profile page first",
     "gradesNoData": "No grade data",
-    "gradesLoadFailed": "Failed to load grades",
     "gradesRefreshFailed": "Refresh failed, showing cached data",
     "gradesNoPassingData": "No passing grade data",
     "gradesSearchHint": "Search course name",
@@ -612,7 +610,6 @@
     "fitnessTestReadCount": "reads",
     "fitnessTestSticky": "Pinned",
     "fitnessTestNoticeDetail": "Notice Detail",
-    "fitnessTestCampusNetworkRequiredAtNight": "Access is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.",
     "dockLabelFitnessTest": "Fitness",
     "dockLabelNotice": "Notice",
     "dockLabelNoticeParty": "XGB",
@@ -759,7 +756,6 @@
     "examPlan": "Exam Schedule",
     "examPlanDesc": "View exam times, locations and seat numbers",
     "examPlanNoData": "No exam schedule available",
-    "examPlanLoadFailed": "Failed to load exam schedule",
     "campusGridView": "Grid View",
     "campusGridViewDesc": "Use grid layout for campus page"
 }

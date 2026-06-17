@@ -3,7 +3,7 @@ import 'package:bugaoshan/pages/campus/train_program/models/train_program.dart';
 import 'package:bugaoshan/pages/campus/train_program/models/train_program_model.dart';
 import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 enum TrainProgramLoadState { idle, loading, loaded, error }
 
@@ -24,11 +24,11 @@ class TrainProgramProvider extends ChangeNotifier {
   TrainProgramLoadState _detailState = TrainProgramLoadState.idle;
   TrainProgramLoadState _courseDetailState = TrainProgramLoadState.idle;
 
-  String? _collegesError;
-  String? _gradesError;
-  String? _programsError;
-  String? _detailError;
-  String? _courseDetailError;
+  LoadErrorType? _collegesError;
+  LoadErrorType? _gradesError;
+  LoadErrorType? _programsError;
+  LoadErrorType? _detailError;
+  LoadErrorType? _courseDetailError;
 
   String? _selectedCollege;
   String? _selectedGrade;
@@ -45,11 +45,11 @@ class TrainProgramProvider extends ChangeNotifier {
   TrainProgramLoadState get detailState => _detailState;
   TrainProgramLoadState get courseDetailState => _courseDetailState;
 
-  String? get collegesError => _collegesError;
-  String? get gradesError => _gradesError;
-  String? get programsError => _programsError;
-  String? get detailError => _detailError;
-  String? get courseDetailError => _courseDetailError;
+  LoadErrorType? get collegesError => _collegesError;
+  LoadErrorType? get gradesError => _gradesError;
+  LoadErrorType? get programsError => _programsError;
+  LoadErrorType? get detailError => _detailError;
+  LoadErrorType? get courseDetailError => _courseDetailError;
 
   String? get selectedCollege => _selectedCollege;
   String? get selectedGrade => _selectedGrade;
@@ -93,18 +93,18 @@ class TrainProgramProvider extends ChangeNotifier {
     } on UnauthenticatedException {
       _collegesState = TrainProgramLoadState.error;
       _gradesState = TrainProgramLoadState.error;
-      _collegesError = 'sessionExpired';
-      _gradesError = 'sessionExpired';
+      _collegesError = LoadErrorType.sessionExpired;
+      _gradesError = LoadErrorType.sessionExpired;
     } on ServiceException catch (_) {
       _collegesState = TrainProgramLoadState.error;
       _gradesState = TrainProgramLoadState.error;
-      _collegesError = campusNetworkErrorKey('loadFailed');
-      _gradesError = campusNetworkErrorKey('loadFailed');
+      _collegesError = campusNetworkErrorType(LoadErrorType.loadFailed);
+      _gradesError = campusNetworkErrorType(LoadErrorType.loadFailed);
     } catch (_) {
       _collegesState = TrainProgramLoadState.error;
       _gradesState = TrainProgramLoadState.error;
-      _collegesError = campusNetworkErrorKey('loadFailed');
-      _gradesError = campusNetworkErrorKey('loadFailed');
+      _collegesError = campusNetworkErrorType(LoadErrorType.loadFailed);
+      _gradesError = campusNetworkErrorType(LoadErrorType.loadFailed);
     }
     _safeNotify();
   }
@@ -123,13 +123,13 @@ class TrainProgramProvider extends ChangeNotifier {
       _programsState = TrainProgramLoadState.loaded;
     } on UnauthenticatedException {
       _programsState = TrainProgramLoadState.error;
-      _programsError = 'sessionExpired';
+      _programsError = LoadErrorType.sessionExpired;
     } on ServiceException catch (_) {
       _programsState = TrainProgramLoadState.error;
-      _programsError = campusNetworkErrorKey('loadFailed');
+      _programsError = campusNetworkErrorType(LoadErrorType.loadFailed);
     } catch (_) {
       _programsState = TrainProgramLoadState.error;
-      _programsError = campusNetworkErrorKey('loadFailed');
+      _programsError = campusNetworkErrorType(LoadErrorType.loadFailed);
     }
     _safeNotify();
   }
@@ -145,13 +145,13 @@ class TrainProgramProvider extends ChangeNotifier {
       _detailState = TrainProgramLoadState.loaded;
     } on UnauthenticatedException {
       _detailState = TrainProgramLoadState.error;
-      _detailError = 'sessionExpired';
+      _detailError = LoadErrorType.sessionExpired;
     } on ServiceException catch (_) {
       _detailState = TrainProgramLoadState.error;
-      _detailError = campusNetworkErrorKey('loadFailed');
+      _detailError = campusNetworkErrorType(LoadErrorType.loadFailed);
     } catch (_) {
       _detailState = TrainProgramLoadState.error;
-      _detailError = campusNetworkErrorKey('loadFailed');
+      _detailError = campusNetworkErrorType(LoadErrorType.loadFailed);
     }
     _safeNotify();
   }
@@ -173,13 +173,13 @@ class TrainProgramProvider extends ChangeNotifier {
       _courseDetailState = TrainProgramLoadState.loaded;
     } on UnauthenticatedException {
       _courseDetailState = TrainProgramLoadState.error;
-      _courseDetailError = 'sessionExpired';
+      _courseDetailError = LoadErrorType.sessionExpired;
     } on ServiceException catch (_) {
       _courseDetailState = TrainProgramLoadState.error;
-      _courseDetailError = campusNetworkErrorKey('loadFailed');
+      _courseDetailError = campusNetworkErrorType(LoadErrorType.loadFailed);
     } catch (_) {
       _courseDetailState = TrainProgramLoadState.error;
-      _courseDetailError = campusNetworkErrorKey('loadFailed');
+      _courseDetailError = campusNetworkErrorType(LoadErrorType.loadFailed);
     }
     _safeNotify();
   }

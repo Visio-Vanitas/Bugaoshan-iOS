@@ -3,7 +3,7 @@ import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/models/scheme_score.dart';
 import 'package:bugaoshan/providers/grades_provider.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 import 'package:bugaoshan/widgets/common/stat_item.dart';
 import 'scheme_scores_tab.dart' show ScoreCardWidget;
 
@@ -30,7 +30,7 @@ class _PassingScoresTabState extends State<PassingScoresTab> {
             provider.clearPassingError();
             if (!mounted) return;
             final l10n = AppLocalizations.of(context)!;
-            final message = errorKey == 'sessionExpired'
+            final message = errorKey == LoadErrorType.sessionExpired
                 ? l10n.sessionExpired
                 : l10n.gradesRefreshFailed;
             ScaffoldMessenger.of(
@@ -80,25 +80,11 @@ class _PassingScoresTabState extends State<PassingScoresTab> {
   }
 
   Widget _buildError(BuildContext context, GradesProvider provider) {
-    final l10n = AppLocalizations.of(context)!;
     return RetryableErrorWidget(
-      message: _getErrorMessage(l10n, provider.passingError),
+      errorType: provider.passingError!,
       onRetry: provider.refreshPassingScores,
       iconSize: 56,
     );
-  }
-
-  String _getErrorMessage(AppLocalizations l10n, String? errorKey) {
-    switch (errorKey) {
-      case 'sessionExpired':
-        return l10n.sessionExpired;
-      case 'zhjwCampusNetworkRequiredAtNight':
-        return l10n.zhjwCampusNetworkRequiredAtNight;
-      case 'gradesLoadFailed':
-        return l10n.gradesLoadFailed;
-      default:
-        return l10n.loadFailed;
-    }
   }
 
   Widget _buildContent(BuildContext context, GradesProvider provider) {

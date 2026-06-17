@@ -10,7 +10,7 @@ import 'package:bugaoshan/services/auth/wfw_auth.dart';
 import 'package:bugaoshan/utils/constants.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 import 'package:bugaoshan/widgets/common/info_row.dart';
 
 class NetworkDevicePage extends StatefulWidget {
@@ -24,7 +24,7 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
   static const _base = 'https://wfw.scu.edu.cn';
 
   bool _loading = false;
-  String? _error;
+  LoadErrorType? _error;
   Map<String, dynamic>? _userInfo;
   List<Map<String, dynamic>> _devices = [];
   bool _privacyHidden = true;
@@ -63,7 +63,7 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
     final auth = getIt<ScuAuthProvider>();
     if (!auth.isLoggedIn) {
       if (auth.isAutoLoggingIn) return;
-      setState(() => _error = 'notLoggedIn');
+      setState(() => _error = LoadErrorType.notLoggedIn);
       return;
     }
 
@@ -114,7 +114,7 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'notLoggedIn';
+          _error = LoadErrorType.notLoggedIn;
         });
       }
     } catch (e) {
@@ -122,7 +122,7 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'networkError';
+          _error = LoadErrorType.networkError;
         });
       }
     }
@@ -256,16 +256,13 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
     }
 
     if (_error != null) {
-      if (_error == 'notLoggedIn') {
+      if (_error == LoadErrorType.notLoggedIn) {
         if (getIt<ScuAuthProvider>().isAutoLoggingIn) {
           return const AutoLoginLoadingWidget();
         }
         return const LoginRequiredWidget();
       }
-      return RetryableErrorWidget(
-        message: _getErrorMessage(l10n, _error!),
-        onRetry: _loadData,
-      );
+      return RetryableErrorWidget(errorType: _error!, onRetry: _loadData);
     }
 
     return RefreshIndicator(
@@ -454,20 +451,5 @@ class _NetworkDevicePageState extends State<NetworkDevicePage> {
         ],
       ),
     );
-  }
-
-  String _getErrorMessage(AppLocalizations l10n, String errorKey) {
-    switch (errorKey) {
-      case 'networkError':
-        return l10n.networkError;
-      case 'ccylBindFailed':
-        return l10n.ccylBindFailed;
-      case 'ccylActivityLoadFailed':
-        return l10n.ccylActivityLoadFailed;
-      case 'campusNetworkRequired':
-        return l10n.campusNetworkRequired;
-      default:
-        return l10n.loadFailed;
-    }
   }
 }

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:bugaoshan/utils/app_shapes.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
-import 'package:bugaoshan/widgets/common/error_widgets.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 import 'package:bugaoshan/widgets/common/image_viewer.dart';
 import 'package:http/http.dart' as http;
 
@@ -137,7 +137,10 @@ class _AcademicCalendarPageState extends State<AcademicCalendarPage> {
 
   Widget _buildBody(AppLocalizations l10n) {
     if (_error != null && _entries.isEmpty) {
-      return RetryableErrorWidget(message: l10n.loadFailed, onRetry: _loadList);
+      return RetryableErrorWidget(
+        errorType: LoadErrorType.loadFailed,
+        onRetry: _loadList,
+      );
     }
 
     return Column(

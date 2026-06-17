@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bugaoshan/pages/campus/plan_completion/models/plan_completion.dart';
 import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 const _keyPlanCompletion = 'plan_completion_nodes';
 
@@ -30,11 +30,11 @@ class PlanCompletionProvider extends ChangeNotifier {
 
   List<PlanCompletionNode> _nodes = [];
   PlanCompletionLoadState _state = PlanCompletionLoadState.idle;
-  String? _error;
+  LoadErrorType? _error;
 
   List<PlanCompletionNode> get nodes => _nodes;
   PlanCompletionLoadState get state => _state;
-  String? get error => _error;
+  LoadErrorType? get error => _error;
 
   List<PlanCompletionNode> get rootNodes =>
       _nodes.where((n) => n.pId == '-1').toList();
@@ -67,14 +67,14 @@ class PlanCompletionProvider extends ChangeNotifier {
       } else {
         _state = PlanCompletionLoadState.error;
       }
-      _error = 'rateLimited';
+      _error = LoadErrorType.rateLimited;
     } on ServiceException catch (_) {
       if (_nodes.isNotEmpty) {
         _state = PlanCompletionLoadState.loaded;
-        _error = campusNetworkErrorKey('loadFailed');
+        _error = campusNetworkErrorType(LoadErrorType.loadFailed);
       } else {
         _state = PlanCompletionLoadState.error;
-        _error = campusNetworkErrorKey('loadFailed');
+        _error = campusNetworkErrorType(LoadErrorType.loadFailed);
       }
     } on UnauthenticatedException {
       if (_nodes.isNotEmpty) {
@@ -82,14 +82,14 @@ class PlanCompletionProvider extends ChangeNotifier {
       } else {
         _state = PlanCompletionLoadState.error;
       }
-      _error = 'sessionExpired';
+      _error = LoadErrorType.sessionExpired;
     } catch (_) {
       if (_nodes.isNotEmpty) {
         _state = PlanCompletionLoadState.loaded;
       } else {
         _state = PlanCompletionLoadState.error;
       }
-      _error = campusNetworkErrorKey('loadFailed');
+      _error = campusNetworkErrorType(LoadErrorType.loadFailed);
     }
     _safeNotify();
   }

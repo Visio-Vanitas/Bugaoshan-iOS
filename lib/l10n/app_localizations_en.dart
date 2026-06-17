@@ -188,11 +188,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get campusNetworkRequiredAtNight =>
-      'Access is restricted to campus network during 0:00-6:00. Please connect to campus Wi-Fi or use the school VPN.';
-
-  @override
-  String get zhjwCampusNetworkRequiredAtNight =>
-      'Access to the academic affairs system is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.';
+      'Access is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.';
 
   @override
   String get appOnly => 'Available on App only';
@@ -926,9 +922,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gradesNoData => 'No grade data';
-
-  @override
-  String get gradesLoadFailed => 'Failed to load grades';
 
   @override
   String get gradesRefreshFailed => 'Refresh failed, showing cached data';
@@ -1720,10 +1713,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fitnessTestNoticeDetail => 'Notice Detail';
 
   @override
-  String get fitnessTestCampusNetworkRequiredAtNight =>
-      'Access is restricted to campus network during 23:00-6:00. Please connect to campus Wi-Fi or use the school VPN.';
-
-  @override
   String get dockLabelFitnessTest => 'Fitness';
 
   @override
@@ -2023,9 +2012,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get examPlanNoData => 'No exam schedule available';
-
-  @override
-  String get examPlanLoadFailed => 'Failed to load exam schedule';
 
   @override
   String get campusGridView => 'Grid View';

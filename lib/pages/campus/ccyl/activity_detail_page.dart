@@ -5,6 +5,7 @@ import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/providers/ccyl_provider.dart';
 import 'package:bugaoshan/pages/campus/ccyl/models/ccyl_models.dart';
 import 'package:bugaoshan/widgets/common/image_viewer.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 class ActivityDetailPage extends StatefulWidget {
   final String activityId;
@@ -17,7 +18,7 @@ class ActivityDetailPage extends StatefulWidget {
 
 class _ActivityDetailPageState extends State<ActivityDetailPage> {
   bool _loading = true;
-  String? _error;
+  LoadErrorType? _error;
   CyclActivity? _activity;
   CyclActivityLib? _activityLib;
   bool _signedUp = false;
@@ -52,7 +53,7 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
       debugPrint('Activity detail load error: $e');
       if (!mounted) return;
       setState(() {
-        _error = 'ccylActivityLoadFailed';
+        _error = LoadErrorType.ccylActivityLoadFailed;
         _loading = false;
       });
     }
@@ -237,21 +238,7 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _getErrorMessage(l10n, _error!),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loadData, child: Text(l10n.loadFailed)),
-          ],
-        ),
-      );
+      return RetryableErrorWidget(errorType: _error!, onRetry: _loadData);
     }
 
     if (_activity == null) {
@@ -644,14 +631,5 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
         ],
       ),
     );
-  }
-
-  String _getErrorMessage(AppLocalizations l10n, String errorKey) {
-    switch (errorKey) {
-      case 'ccylActivityLoadFailed':
-        return l10n.ccylActivityLoadFailed;
-      default:
-        return l10n.loadFailed;
-    }
   }
 }

@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bugaoshan/models/scheme_score.dart';
 import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 const _keySchemeScores = 'grades_scheme_scores';
 const _keyPassingScores = 'grades_passing_scores';
@@ -39,11 +39,11 @@ class GradesProvider extends ChangeNotifier {
   // --- 方案成绩 ---
   SchemeScoreSummary? _schemeScores;
   GradesLoadState _schemeState = GradesLoadState.idle;
-  String? _schemeError;
+  LoadErrorType? _schemeError;
 
   SchemeScoreSummary? get schemeScores => _schemeScores;
   GradesLoadState get schemeState => _schemeState;
-  String? get schemeError => _schemeError;
+  LoadErrorType? get schemeError => _schemeError;
 
   Future<void> refreshSchemeScores() async {
     if (_schemeState == GradesLoadState.loading) return;
@@ -58,19 +58,19 @@ class GradesProvider extends ChangeNotifier {
     } on UnauthenticatedException {
       if (_schemeScores != null) {
         _schemeState = GradesLoadState.loaded;
-        _schemeError = 'sessionExpired';
+        _schemeError = LoadErrorType.sessionExpired;
       } else {
         _schemeState = GradesLoadState.error;
-        _schemeError = 'sessionExpired';
+        _schemeError = LoadErrorType.sessionExpired;
       }
     } catch (e) {
       debugPrint('Scheme scores load error: $e');
       if (_schemeScores != null) {
         _schemeState = GradesLoadState.loaded;
-        _schemeError = campusNetworkErrorKey('gradesLoadFailed');
+        _schemeError = campusNetworkErrorType(LoadErrorType.loadFailed);
       } else {
         _schemeState = GradesLoadState.error;
-        _schemeError = campusNetworkErrorKey('gradesLoadFailed');
+        _schemeError = campusNetworkErrorType(LoadErrorType.loadFailed);
       }
     }
     notifyListeners();
@@ -83,11 +83,11 @@ class GradesProvider extends ChangeNotifier {
   // --- 及格成绩 ---
   PassingScoreResult? _passingScores;
   GradesLoadState _passingState = GradesLoadState.idle;
-  String? _passingError;
+  LoadErrorType? _passingError;
 
   PassingScoreResult? get passingScores => _passingScores;
   GradesLoadState get passingState => _passingState;
-  String? get passingError => _passingError;
+  LoadErrorType? get passingError => _passingError;
 
   Future<void> refreshPassingScores() async {
     if (_passingState == GradesLoadState.loading) return;
@@ -102,19 +102,19 @@ class GradesProvider extends ChangeNotifier {
     } on UnauthenticatedException {
       if (_passingScores != null) {
         _passingState = GradesLoadState.loaded;
-        _passingError = 'sessionExpired';
+        _passingError = LoadErrorType.sessionExpired;
       } else {
         _passingState = GradesLoadState.error;
-        _passingError = 'sessionExpired';
+        _passingError = LoadErrorType.sessionExpired;
       }
     } catch (e) {
       debugPrint('Passing scores load error: $e');
       if (_passingScores != null) {
         _passingState = GradesLoadState.loaded;
-        _passingError = campusNetworkErrorKey('gradesLoadFailed');
+        _passingError = campusNetworkErrorType(LoadErrorType.loadFailed);
       } else {
         _passingState = GradesLoadState.error;
-        _passingError = campusNetworkErrorKey('gradesLoadFailed');
+        _passingError = campusNetworkErrorType(LoadErrorType.loadFailed);
       }
     }
     notifyListeners();

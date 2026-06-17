@@ -6,7 +6,7 @@ import 'package:bugaoshan/pages/campus/models/class_schedule_inquiry_model.dart'
 import 'package:bugaoshan/providers/app_config_provider.dart';
 import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 import 'package:bugaoshan/utils/app_shapes.dart';
 import 'package:bugaoshan/utils/week_parser.dart';
 import 'package:bugaoshan/widgets/course/course_grid.dart';
@@ -28,7 +28,7 @@ class _ClassScheduleInquiryDetailPageState
   late final ZhjwApiService _zhjwApi;
   List<ClassScheduleInquiryItem> _courses = [];
   bool _isLoading = true;
-  String? _error;
+  LoadErrorType? _error;
 
   @override
   void initState() {
@@ -55,14 +55,14 @@ class _ClassScheduleInquiryDetailPageState
     } on UnauthenticatedException catch (_) {
       if (!mounted) return;
       setState(() {
-        _error = 'sessionExpired';
+        _error = LoadErrorType.sessionExpired;
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('ClassScheduleInquiry detail load error: $e');
       if (!mounted) return;
       setState(() {
-        _error = campusNetworkErrorKey('loadFailed');
+        _error = campusNetworkErrorType(LoadErrorType.loadFailed);
         _isLoading = false;
       });
     }
@@ -97,12 +97,7 @@ class _ClassScheduleInquiryDetailPageState
     }
 
     if (_error != null) {
-      return CampusNetworkRequiredWidget(
-        message: _error == 'sessionExpired'
-            ? l10n.sessionExpired
-            : getCampusNetworkErrorMessage(l10n, _error),
-        onRetry: _loadSchedule,
-      );
+      return RetryableErrorWidget(errorType: _error!, onRetry: _loadSchedule);
     }
 
     if (_courses.isEmpty) {

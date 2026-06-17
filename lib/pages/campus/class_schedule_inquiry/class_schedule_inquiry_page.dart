@@ -8,7 +8,7 @@ import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
-import 'package:bugaoshan/widgets/common/campus_network_required_widget.dart';
+import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
 
 class ClassScheduleInquiryPage extends StatefulWidget {
   const ClassScheduleInquiryPage({super.key});
@@ -30,7 +30,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
   static const int _pageSize = 30;
   int _subjectReqSeq = 0;
   int _classOptionReqSeq = 0;
-  String? _error;
+  LoadErrorType? _error;
 
   // 筛选选项
   List<SemesterOption> _semesters = [];
@@ -88,7 +88,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
       debugPrint('ClassScheduleInquiry index load error: $e');
       if (!mounted) return;
       setState(() {
-        _error = campusNetworkErrorKey('loadFailed');
+        _error = campusNetworkErrorType(LoadErrorType.loadFailed);
         _isLoadingIndex = false;
       });
     }
@@ -187,7 +187,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
     } on UnauthenticatedException catch (_) {
       if (!mounted) return;
       setState(() {
-        _error = 'sessionExpired';
+        _error = LoadErrorType.sessionExpired;
         _isLoading = false;
         _isLoadingMore = false;
       });
@@ -195,7 +195,7 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
       debugPrint('ClassScheduleInquiry load error: $e');
       if (!mounted) return;
       setState(() {
-        _error = campusNetworkErrorKey('loadFailed');
+        _error = campusNetworkErrorType(LoadErrorType.loadFailed);
         _isLoading = false;
         _isLoadingMore = false;
       });
@@ -228,19 +228,12 @@ class _ClassScheduleInquiryPageState extends State<ClassScheduleInquiryPage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     if (_isLoadingIndex) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null && _classes.isEmpty) {
-      return CampusNetworkRequiredWidget(
-        message: _error == 'sessionExpired'
-            ? l10n.sessionExpired
-            : getCampusNetworkErrorMessage(l10n, _error),
-        onRetry: _loadIndex,
-      );
+      return RetryableErrorWidget(errorType: _error!, onRetry: _loadIndex);
     }
 
     return Column(
