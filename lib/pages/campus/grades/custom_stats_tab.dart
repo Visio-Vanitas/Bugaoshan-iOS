@@ -399,8 +399,9 @@ class _CustomSummaryCard extends StatelessWidget {
     for (final item in selectedItems) {
       if (!item.passed ||
           !item.hasEffectiveScore ||
-          item.courseAttributeName != '必修')
+          item.courseAttributeName != '必修') {
         continue;
+      }
       final credit = double.tryParse(item.credit) ?? 0;
       if (credit <= 0) continue;
       totalPoints += item.gradePointScore * credit;
@@ -428,8 +429,9 @@ class _CustomSummaryCard extends StatelessWidget {
     for (final item in selectedItems) {
       if (!item.passed ||
           !item.hasEffectiveScore ||
-          item.courseAttributeName != '必修')
+          item.courseAttributeName != '必修') {
         continue;
+      }
       final credit = double.tryParse(item.credit) ?? 0;
       if (credit <= 0) continue;
       totalScore += item.courseScore * credit;

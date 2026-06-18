@@ -130,8 +130,9 @@ class SchemeScoreSummary {
     for (final item in items) {
       if (!item.passed ||
           !item.hasEffectiveScore ||
-          item.courseAttributeName != '必修')
+          item.courseAttributeName != '必修') {
         continue;
+      }
       final credit = double.tryParse(item.credit) ?? 0;
       if (credit <= 0) continue;
       totalPoints += item.gradePointScore * credit;
@@ -169,8 +170,9 @@ class SchemeScoreSummary {
     for (final item in items) {
       if (!item.passed ||
           !item.hasEffectiveScore ||
-          item.courseAttributeName != '必修')
+          item.courseAttributeName != '必修') {
         continue;
+      }
       final credit = double.tryParse(item.credit) ?? 0;
       if (credit <= 0) continue;
       totalScore += item.courseScore * credit;
@@ -191,8 +193,9 @@ class SchemeScoreSummary {
   double _creditsByAttr(String attr) => items.fold(0.0, (sum, item) {
     if (!item.passed ||
         !item.hasEffectiveScore ||
-        item.courseAttributeName != attr)
+        item.courseAttributeName != attr) {
       return sum;
+    }
     return sum + (double.tryParse(item.credit) ?? 0);
   });
 }
@@ -344,8 +347,9 @@ class PassingScoreResult {
       for (final item in g.items) {
         if (!item.passed ||
             !item.hasEffectiveScore ||
-            item.courseAttributeName != '必修')
+            item.courseAttributeName != '必修') {
           continue;
+        }
         final credit = double.tryParse(item.credit) ?? 0;
         if (credit <= 0) continue;
         totalScore += item.courseScore * credit;
