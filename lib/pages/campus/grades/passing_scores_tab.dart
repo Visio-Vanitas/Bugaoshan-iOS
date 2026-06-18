@@ -96,9 +96,6 @@ class _PassingScoresTabState extends State<PassingScoresTab> {
         .map(
           (g) => PassingScoreGroup(
             label: g.label,
-            yxxf: g.yxxf,
-            tgms: g.tgms,
-            wtgms: g.wtgms,
             items: g.items
                 .where(
                   (item) => item.courseName.toLowerCase().contains(

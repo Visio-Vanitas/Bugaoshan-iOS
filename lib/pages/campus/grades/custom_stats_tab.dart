@@ -385,7 +385,7 @@ class _CustomSummaryCard extends StatelessWidget {
     double totalCredits = 0;
     for (final item in selectedItems) {
       final credit = double.tryParse(item.credit) ?? 0;
-      if (credit > 0 && item.passed) {
+      if (credit > 0 && item.passed && item.hasEffectiveScore) {
         totalPoints += item.gradePointScore * credit;
         totalCredits += credit;
       }
@@ -397,7 +397,10 @@ class _CustomSummaryCard extends StatelessWidget {
     double totalPoints = 0;
     double totalCredits = 0;
     for (final item in selectedItems) {
-      if (!item.passed || item.courseAttributeName != '必修') continue;
+      if (!item.passed ||
+          !item.hasEffectiveScore ||
+          item.courseAttributeName != '必修')
+        continue;
       final credit = double.tryParse(item.credit) ?? 0;
       if (credit <= 0) continue;
       totalPoints += item.gradePointScore * credit;
@@ -410,7 +413,7 @@ class _CustomSummaryCard extends StatelessWidget {
     double totalScore = 0;
     double totalCredits = 0;
     for (final item in selectedItems) {
-      if (!item.passed) continue;
+      if (!item.passed || !item.hasEffectiveScore) continue;
       final credit = double.tryParse(item.credit) ?? 0;
       if (credit <= 0) continue;
       totalScore += item.courseScore * credit;
@@ -423,7 +426,10 @@ class _CustomSummaryCard extends StatelessWidget {
     double totalScore = 0;
     double totalCredits = 0;
     for (final item in selectedItems) {
-      if (!item.passed || item.courseAttributeName != '必修') continue;
+      if (!item.passed ||
+          !item.hasEffectiveScore ||
+          item.courseAttributeName != '必修')
+        continue;
       final credit = double.tryParse(item.credit) ?? 0;
       if (credit <= 0) continue;
       totalScore += item.courseScore * credit;
@@ -432,15 +438,19 @@ class _CustomSummaryCard extends StatelessWidget {
     return totalCredits > 0 ? totalScore / totalCredits : 0.0;
   }
 
-  int get _passedCount => selectedItems.where((i) => i.passed).length;
-  int get _failedCount => selectedItems.where((i) => !i.passed).length;
+  int get _passedCount =>
+      selectedItems.where((i) => i.passed && i.hasEffectiveScore).length;
+  int get _failedCount =>
+      selectedItems.where((i) => !i.passed && i.hasEffectiveScore).length;
 
   double get _earnedCredits => selectedItems
-      .where((i) => i.passed)
+      .where((i) => i.passed && i.hasEffectiveScore)
       .fold(0.0, (sum, i) => sum + (double.tryParse(i.credit) ?? 0));
 
   double _creditsByAttr(String attr) => selectedItems
-      .where((i) => i.passed && i.courseAttributeName == attr)
+      .where(
+        (i) => i.passed && i.hasEffectiveScore && i.courseAttributeName == attr,
+      )
       .fold(0.0, (sum, i) => sum + (double.tryParse(i.credit) ?? 0));
 
   double get _requiredCredits => _creditsByAttr('必修');
