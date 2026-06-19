@@ -2018,4 +2018,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get campusGridViewDesc => 'Use grid layout for campus page';
+
+  @override
+  String get viewChangelog => 'Version Changelog';
+
+  @override
+  String get viewChangelogSubtitle => 'View historical version update logs';
+
+  @override
+  String get changelog => 'Changelog';
+
+  @override
+  String get unreleased => 'Unreleased';
 }

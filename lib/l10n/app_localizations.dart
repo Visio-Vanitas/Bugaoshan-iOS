@@ -3870,6 +3870,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use grid layout for campus page'**
   String get campusGridViewDesc;
+
+  /// No description provided for @viewChangelog.
+  ///
+  /// In en, this message translates to:
+  /// **'Version Changelog'**
+  String get viewChangelog;
+
+  /// No description provided for @viewChangelogSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View historical version update logs'**
+  String get viewChangelogSubtitle;
+
+  /// No description provided for @changelog.
+  ///
+  /// In en, this message translates to:
+  /// **'Changelog'**
+  String get changelog;
+
+  /// No description provided for @unreleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreleased'**
+  String get unreleased;
 }
 
 class _AppLocalizationsDelegate

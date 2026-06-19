@@ -1961,6 +1961,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get campusGridViewDesc => '校园页面使用网格布局';
+
+  @override
+  String get viewChangelog => '版本更新日志';
+
+  @override
+  String get viewChangelogSubtitle => '查看历史版本更新记录';
+
+  @override
+  String get changelog => '更新日志';
+
+  @override
+  String get unreleased => '未发布';
 }
 
 /// The translations for Chinese, as used in China, using the Han script (`zh_Hans_CN`).

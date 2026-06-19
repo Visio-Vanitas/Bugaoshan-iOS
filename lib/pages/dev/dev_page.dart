@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
 import 'package:bugaoshan/pages/dev/auth_log/auth_log_tile.dart';
+import 'package:bugaoshan/pages/dev/changelog/changelog_tile.dart';
 import 'package:bugaoshan/pages/dev/environment_info_tile.dart';
 import 'package:bugaoshan/pages/dev/update_card.dart';
 import 'package:bugaoshan/pages/dev/update_result_notifier.dart';
@@ -95,6 +96,8 @@ class _DevPageState extends State<DevPage> {
           const AuthLogTile(),
           const Divider(),
           const UiTile(),
+          const Divider(),
+          const ChangelogTile(),
           const Divider(),
           if (_supportsUpdate) ...[
             const SizedBox(height: 16),

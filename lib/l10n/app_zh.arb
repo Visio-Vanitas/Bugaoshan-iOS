@@ -752,5 +752,9 @@
     "examPlanDesc": "查询本学期考试时间、地点和座位号",
     "examPlanNoData": "暂无考试安排",
     "campusGridView": "网格视图",
-    "campusGridViewDesc": "校园页面使用网格布局"
+    "campusGridViewDesc": "校园页面使用网格布局",
+    "viewChangelog": "版本更新日志",
+    "viewChangelogSubtitle": "查看历史版本更新记录",
+    "changelog": "更新日志",
+    "unreleased": "未发布"
 }

@@ -757,5 +757,9 @@
     "examPlanDesc": "View exam times, locations and seat numbers",
     "examPlanNoData": "No exam schedule available",
     "campusGridView": "Grid View",
-    "campusGridViewDesc": "Use grid layout for campus page"
+    "campusGridViewDesc": "Use grid layout for campus page",
+    "viewChangelog": "Version Changelog",
+    "viewChangelogSubtitle": "View historical version update logs",
+    "changelog": "Changelog",
+    "unreleased": "Unreleased"
 }
