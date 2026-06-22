@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2-beta.1] - 2026-06-22
+
+> **iOS Beta 版说明**：本版本为 iOS Beta 预览版，未经过完整测试和实际使用。
+
 ### Added
 - 教室列表增加「当前空闲」筛选
 
