@@ -13,11 +13,13 @@ void main() {
   </div>
   <div class="widget-body">
     <div class="widget-main">
-      第 18 周&nbsp;2026-06-27&nbsp;星期六&nbsp;09:00-11:00</br>
+      <div>
+      第18周&nbsp;2026-06-27&nbsp;星期六&nbsp;09:00-11:00</br>
       地点:&nbsp;江安一教A101</br>
       座位号:&nbsp;12</br>
       准考证号:&nbsp;SCU20260627</br>
       <span>考试提示信息：&nbsp;请携带学生证</span>
+      </div>
     </div>
   </div>
 </div>
