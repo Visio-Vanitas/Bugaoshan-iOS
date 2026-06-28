@@ -1453,11 +1453,23 @@ abstract class AppLocalizations {
   /// **'Export Schedule'**
   String get exportSchedule;
 
+  /// No description provided for @exportExamPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Exam Schedule'**
+  String get exportExamPlan;
+
   /// No description provided for @exportScheduleAsCopy.
   ///
   /// In en, this message translates to:
   /// **'Copy to Clipboard'**
   String get exportScheduleAsCopy;
+
+  /// No description provided for @exportScheduleCalendarActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar Actions'**
+  String get exportScheduleCalendarActions;
 
   /// No description provided for @exportScheduleAsIcs.
   ///
@@ -1470,6 +1482,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Schedule data copied to clipboard'**
   String get exportScheduleAsCopySuccess;
+
+  /// No description provided for @exportExamPlanAsCopySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam schedule data copied to clipboard'**
+  String get exportExamPlanAsCopySuccess;
 
   /// No description provided for @exportScheduleAsCopyFailed.
   ///
@@ -1524,6 +1542,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import failed'**
   String get exportScheduleAddToCalendarFailed;
+
+  /// No description provided for @exportScheduleSelectCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Calendar'**
+  String get exportScheduleSelectCalendar;
+
+  /// No description provided for @exportScheduleCalendarDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default calendar'**
+  String get exportScheduleCalendarDefault;
 
   /// No description provided for @copySuffix.
   ///

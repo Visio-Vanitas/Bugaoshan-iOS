@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:bugaoshan/pages/campus/models/class_schedule_inquiry_model.dart';
 import 'package:bugaoshan/pages/campus/models/classroom_model.dart';
 import 'package:bugaoshan/pages/campus/plan_completion/models/plan_completion.dart';
@@ -509,13 +508,12 @@ class ZhjwApiService {
       );
       final body = resp.body.trim();
       _checkSessionExpiry(body, resp.statusCode);
-      return parseExamCardsHtml(body);
+      return _parseExamCards(body);
     });
   }
 
   /// 用正则从考表 HTML 中提取考试卡片信息。
-  @visibleForTesting
-  static List<ExamInfo> parseExamCardsHtml(String html) {
+  List<ExamInfo> _parseExamCards(String html) {
     final cards = <ExamInfo>[];
     final blocks = RegExp(
       r'<div class="widget-box widget-color-\w+">(.*?)'
@@ -525,6 +523,7 @@ class ZhjwApiService {
 
     for (final block in blocks) {
       final blockText = block.group(1)!;
+
       String? firstMatch(RegExp re) {
         final m = re.firstMatch(blockText);
         return m?.group(1)?.trim();

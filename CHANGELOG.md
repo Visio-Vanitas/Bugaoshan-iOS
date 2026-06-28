@@ -33,23 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 优化窄屏课表地点显示
 - 更新添加哈希校验，增强安全性
 
-## [2.0.2-beta.1] - 2026-06-22
-
-> **iOS Beta 版说明**：本版本为 iOS Beta 预览版，未经过完整测试和实际使用。
-
-### Added
-- 教室列表增加「当前空闲」筛选
-
-### Fixed
-- 升级对话框不可滚动的问题
-- 课程卡片中较长的地点文本允许完整换行，并调整小字号
-- 修复校园网页面冷启动显示网络错误的问题
-
-### Changed
-- 底层统一加载错误组件，提供更一致的效果
-- 优化窄屏课表地点显示
-- 更新添加哈希校验，增强安全性
-
 ## [2.0.1] - 2026-06-15
 
 ### Fixed
@@ -250,4 +233,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 发布工作流重构
 - 训练计划列表底部增加间距
 - 非移动平台隐藏刷新按钮
+
 

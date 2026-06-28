@@ -733,13 +733,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportSchedule => 'Export Schedule';
 
   @override
+  String get exportExamPlan => 'Export Exam Schedule';
+
+  @override
   String get exportScheduleAsCopy => 'Copy to Clipboard';
+
+  @override
+  String get exportScheduleCalendarActions => 'Calendar Actions';
 
   @override
   String get exportScheduleAsIcs => 'Export to Calendar File';
 
   @override
   String get exportScheduleAsCopySuccess => 'Schedule data copied to clipboard';
+
+  @override
+  String get exportExamPlanAsCopySuccess =>
+      'Exam schedule data copied to clipboard';
 
   @override
   String get exportScheduleAsCopyFailed =>
@@ -768,6 +778,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportScheduleAddToCalendarFailed => 'Import failed';
+
+  @override
+  String get exportScheduleSelectCalendar => 'Choose Calendar';
+
+  @override
+  String get exportScheduleCalendarDefault => 'Default calendar';
 
   @override
   String get copySuffix => ' (Copy)';

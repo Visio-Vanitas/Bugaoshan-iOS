@@ -21,4 +21,18 @@ class ExamInfo {
     required this.ticketNumber,
     required this.tip,
   });
+
+  Map<String, Object> toJson() {
+    return {
+      'courseName': courseName,
+      'week': week,
+      'date': date,
+      'weekday': weekday,
+      'timeRange': timeRange,
+      'location': location,
+      'seatNumber': seatNumber,
+      'ticketNumber': ticketNumber,
+      'tip': tip,
+    };
+  }
 }
