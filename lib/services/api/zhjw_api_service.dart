@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:bugaoshan/pages/campus/models/class_schedule_inquiry_model.dart';
 import 'package:bugaoshan/pages/campus/models/classroom_model.dart';
 import 'package:bugaoshan/pages/campus/plan_completion/models/plan_completion.dart';
@@ -508,45 +509,57 @@ class ZhjwApiService {
       );
       final body = resp.body.trim();
       _checkSessionExpiry(body, resp.statusCode);
-      return _parseExamCards(body);
+      return parseExamCardsHtml(body);
     });
   }
 
   /// 用正则从考表 HTML 中提取考试卡片信息。
-  List<ExamInfo> _parseExamCards(String html) {
+  @visibleForTesting
+  static List<ExamInfo> parseExamCardsHtml(String html) {
     final cards = <ExamInfo>[];
-    final blocks = RegExp(
-      r'<div class="widget-box widget-color-blue">(.*?)'
-      r'</div>\s*</div>\s*</div>\s*</div>',
-      dotAll: true,
-    ).allMatches(html);
+    final cardStarts = RegExp(
+      r'<div\b(?=[^>]*\bwidget-box\b)(?=[^>]*\bwidget-color-[^"\s]+)[^>]*>',
+      caseSensitive: false,
+    ).allMatches(html).toList();
 
-    for (final block in blocks) {
-      final blockText = block.group(1)!;
+    for (var i = 0; i < cardStarts.length; i++) {
+      final start = cardStarts[i].start;
+      final end = i + 1 < cardStarts.length
+          ? cardStarts[i + 1].start
+          : html.length;
+      final blockText = html.substring(start, end);
+      if (!blockText.contains('地点') && !blockText.contains('座位号')) {
+        continue;
+      }
 
       String? firstMatch(RegExp re) {
         final m = re.firstMatch(blockText);
         return m?.group(1)?.trim();
       }
 
+      final plainText = _normalizeExamText(blockText);
+
       final courseName =
-          firstMatch(
-            RegExp(
-              r'<h5 class="widget-title smaller">\s*(.*?)\s*</h5>',
-              dotAll: true,
+          _cleanHtmlText(
+            firstMatch(
+              RegExp(
+                r'<h5\b[^>]*class="[^"]*\bwidget-title\b[^"]*"[^>]*>(.*?)</h5>',
+                dotAll: true,
+                caseSensitive: false,
+              ),
             ),
           ) ??
           '未知';
-      final weekNum = firstMatch(RegExp(r'(\d+)周')) ?? '';
-      final date = firstMatch(RegExp(r'(\d{4}-\d{2}-\d{2})\s*&nbsp;')) ?? '未知';
-      final weekday = firstMatch(RegExp(r'(星期[一二三四五六日])')) ?? '未知';
-      final timeRange =
-          firstMatch(RegExp(r'&nbsp;(\d{2}:\d{2}-\d{2}:\d{2})')) ?? '未知';
-      final locationRaw = firstMatch(RegExp(r'地点:&nbsp;(.+?)</br>')) ?? '未知';
-      final location = locationRaw.replaceAll('&nbsp;', ' ');
-      final seatNumber = firstMatch(RegExp(r'座位号:&nbsp;(\d+)')) ?? '未知';
-      final ticketNumber = firstMatch(RegExp(r'准考证号:&nbsp;(.*?)</br>')) ?? '';
-      final tip = firstMatch(RegExp(r'考试提示信息：&nbsp;(.*?)</span>')) ?? '无';
+      final weekNum = _firstGroup(plainText, RegExp(r'第?\s*(\d+)\s*周')) ?? '';
+      final date = _parseExamDate(plainText) ?? '未知';
+      final weekday = _firstGroup(plainText, RegExp(r'(星期[一二三四五六日天])')) ?? '未知';
+      final timeRange = _parseExamTimeRange(plainText) ?? '未知';
+      final location =
+          _parseExamField(plainText, '地点', ['座位号', '准考证号', '考试提示信息']) ?? '未知';
+      final seatNumber =
+          _parseExamField(plainText, '座位号', ['准考证号', '考试提示信息']) ?? '未知';
+      final ticketNumber = _parseExamField(plainText, '准考证号', ['考试提示信息']) ?? '';
+      final tip = _parseExamField(plainText, '考试提示信息', const []) ?? '无';
 
       cards.add(
         ExamInfo(
@@ -564,6 +577,69 @@ class ZhjwApiService {
     }
 
     return cards;
+  }
+
+  static String _normalizeExamText(String html) {
+    return html
+        .replaceAll(RegExp(r'</?\s*br\s*/?\s*>', caseSensitive: false), '\n')
+        .replaceAll(RegExp(r'<[^>]+>'), ' ')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .replaceAll(RegExp(r'[ \t\r\f]+'), ' ')
+        .replaceAll(RegExp(r' *\n+ *'), '\n')
+        .trim();
+  }
+
+  static String? _cleanHtmlText(String? html) {
+    if (html == null) return null;
+    return _normalizeExamText(html);
+  }
+
+  static String? _firstGroup(String text, RegExp re) {
+    return re.firstMatch(text)?.group(1)?.trim();
+  }
+
+  static String? _parseExamDate(String text) {
+    final match = RegExp(r'(\d{4})[/-](\d{1,2})[/-](\d{1,2})').firstMatch(text);
+    if (match == null) return null;
+    return [
+      match.group(1)!,
+      match.group(2)!.padLeft(2, '0'),
+      match.group(3)!.padLeft(2, '0'),
+    ].join('-');
+  }
+
+  static String? _parseExamTimeRange(String text) {
+    final match = RegExp(
+      r'(\d{1,2}:\d{2})\s*[-~－—]\s*(\d{1,2}:\d{2})',
+    ).firstMatch(text);
+    if (match == null) return null;
+    return '${_normalizeTime(match.group(1)!)}-${_normalizeTime(match.group(2)!)}';
+  }
+
+  static String _normalizeTime(String value) {
+    final parts = value.split(':');
+    return '${parts[0].padLeft(2, '0')}:${parts[1]}';
+  }
+
+  static String? _parseExamField(
+    String text,
+    String label,
+    List<String> nextLabels,
+  ) {
+    final lookahead = nextLabels.isEmpty
+        ? r'$'
+        : '(?=\\s*(?:${nextLabels.map(RegExp.escape).join('|')})\\s*[:：]|\\s*\$)';
+    final match = RegExp(
+      '${RegExp.escape(label)}\\s*[:：]\\s*(.+?)$lookahead',
+      dotAll: true,
+    ).firstMatch(text);
+    final value = match?.group(1)?.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return value == null || value.isEmpty ? null : value;
   }
 
   // ═══════════════════════════════════════════════════════════════════

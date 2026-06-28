@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:bugaoshan/utils/app_shapes.dart';
 import 'package:bugaoshan/injection/injector.dart';
 import 'package:bugaoshan/l10n/app_localizations.dart';
@@ -6,6 +10,7 @@ import 'package:bugaoshan/pages/campus/exam_plan/models/exam_info.dart';
 import 'package:bugaoshan/providers/scu_auth_provider.dart';
 import 'package:bugaoshan/services/api/zhjw_api_service.dart';
 import 'package:bugaoshan/services/auth/scu_exceptions.dart';
+import 'package:bugaoshan/services/ics_service.dart';
 import 'package:bugaoshan/widgets/common/loading_widgets.dart';
 import 'package:bugaoshan/widgets/common/login_required_widget.dart';
 import 'package:bugaoshan/widgets/common/retryable_error_widget.dart';
@@ -93,6 +98,14 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
       appBar: AppBar(
         title: Text(l10n.examPlan),
         actions: [
+          if (getIt<ScuAuthProvider>().isLoggedIn &&
+              !_loading &&
+              _exams.isNotEmpty)
+            IconButton(
+              tooltip: l10n.exportScheduleAsIcs,
+              onPressed: () => _exportIcs(l10n),
+              icon: const Icon(Icons.calendar_month_outlined),
+            ),
           if (getIt<ScuAuthProvider>().isLoggedIn && !_loading)
             IconButton(onPressed: _loadData, icon: const Icon(Icons.refresh)),
         ],
@@ -313,6 +326,62 @@ class _ExamPlanPageState extends State<ExamPlanPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _exportIcs(AppLocalizations l10n) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final icsContent = IcsService.genExamIcs(exams: _exams);
+    if (!icsContent.contains('BEGIN:VEVENT')) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.exportScheduleAsIcsFailed)),
+      );
+      return;
+    }
+
+    String? destinationPath;
+    try {
+      destinationPath = await FilePicker.saveFile(
+        dialogTitle: l10n.exportScheduleAsIcsTo,
+        fileName: '${_examPlanFileName()}.ics',
+        bytes: Uint8List.fromList(utf8.encode(icsContent)),
+      );
+    } on PlatformException catch (e) {
+      debugPrint("[ExamPlanPage] failed to save exam ICS: $e");
+      if (!mounted) return;
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.exportScheduleAsIcsFailed)),
+      );
+      return;
+    } catch (e) {
+      debugPrint("[ExamPlanPage] failed to export exam ICS: $e");
+      if (!mounted) return;
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.exportScheduleAsIcsFailed)),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          destinationPath == null
+              ? l10n.exportScheduleAsIcsCanceled
+              : l10n.exportScheduleAsIcsSuccess,
+        ),
+      ),
+    );
+  }
+
+  String _examPlanFileName() {
+    final dates =
+        _exams
+            .map((exam) => exam.date)
+            .where((date) => RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date))
+            .toList()
+          ..sort();
+    final suffix = dates.isEmpty ? 'unknown' : '${dates.first}_${dates.last}';
+    return 'exam_plan_$suffix'.replaceAll(RegExp(r'[^\w\u4e00-\u9fff-]'), '_');
   }
 
   Widget _infoChip(IconData icon, String text, ColorScheme colorScheme) {
